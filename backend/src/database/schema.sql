@@ -211,7 +211,9 @@ CREATE TABLE message_templates (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     channel VARCHAR(20) NOT NULL DEFAULT 'ALL',
-    template_text TEXT NOT NULL,
+    template_type VARCHAR(50) DEFAULT 'MARKS',
+    template_text TEXT,
+    body TEXT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

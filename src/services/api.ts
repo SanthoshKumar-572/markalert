@@ -16,24 +16,9 @@ import {
   DashboardStats,
   FacultyClassAssignment
 } from '../types';
+import { getApiBaseUrl, API_BASE_URL } from '../config';
 
-export function getApiBaseUrl(): string {
-  if (typeof window !== 'undefined') {
-    const savedUrl = localStorage.getItem('custom_api_url');
-    if (savedUrl) return savedUrl.replace(/\/$/, '') + '/api';
-
-    const isCapacitor = window.location.protocol === 'capacitor:' || window.location.protocol === 'file:' || (window as any).Capacitor?.isNativePlatform?.();
-    if (isCapacitor) {
-      return 'http://10.176.125.1:5000/api';
-    }
-
-    if (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-      return `http://${window.location.hostname}:5000/api`;
-    }
-  }
-
-  return '/api';
-}
+export { getApiBaseUrl, API_BASE_URL };
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('token');

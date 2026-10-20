@@ -21,11 +21,37 @@ dotenv.config();
 // CollegeSMS server instance
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
+
+// Configured allowed origins with fallback to ALLOWED_ORIGINS env variable
+const defaultAllowedOrigins = [
+  'https://college-mark-notification.vercel.app',
+  'https://markalert.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+const extraOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...extraOrigins]));
 
 // Security & Parsing Middlewares
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      allowedOrigins.includes('*') ||
+      origin.endsWith('.vercel.app')
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '20mb' }));
@@ -83,10 +109,10 @@ async function startServer() {
       await seedDatabase();
     }
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`=======================================================`);
       console.log(`🚀 College Internal Marks Notification Server`);
-      console.log(`📡 Listening on http://localhost:${PORT}`);
+      console.log(`📡 Listening on http://0.0.0.0:${PORT} (port ${PORT})`);
       console.log(`⚡ Mock Notifications Provider: ${process.env.MOCK_NOTIFICATION_PROVIDER || 'true'}`);
       console.log(`=======================================================`);
     });
