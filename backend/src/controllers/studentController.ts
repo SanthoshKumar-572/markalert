@@ -353,7 +353,9 @@ export async function importClassMaster(req: Request, res: Response): Promise<vo
         name: string;
         parent_name?: string;
         mobile_number?: string;
+        student_mobile?: string;
         parent_mobile?: string;
+        phone?: string;
         section?: string;
         email?: string;
       }>;

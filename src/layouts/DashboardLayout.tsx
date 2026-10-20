@@ -86,25 +86,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, role: 'ALL' },
     { id: 'students', label: 'Student Roster', icon: Users, role: 'ALL' },
-    { id: 'upload', label: 'Upload Marks', icon: UploadCloud, badge: 'Collision', role: 'ALL', highlight: true },
-    { id: 'notifications', label: 'Notifications', icon: Send, role: 'ALL' },
-    { id: 'academic', label: isAdmin ? 'Faculty & Academic' : 'Academic Classes', icon: BookOpen, role: 'ALL' },
-    { id: 'reports', label: 'Class Marks Reports', icon: BarChart3, role: 'ALL' },
-    { id: 'settings', label: 'System Settings', icon: Settings, role: 'ADMIN' },
+    { id: 'academic', label: 'Faculty Management', icon: BookOpen, role: 'ALL' },
+    { id: 'upload', label: 'Upload Marks', icon: UploadCloud, role: 'ALL' },
+    { id: 'send', label: 'Notify Parents', icon: Send, badge: 'WIZARD', role: 'ALL' },
+    { id: 'whatsapp-device', label: 'Faculty WhatsApp', icon: Smartphone, role: 'ALL' },
+    { id: 'templates', label: 'Message Templates', icon: FileText, role: 'ALL' },
+    { id: 'notifications', label: 'Notification History', icon: History, role: 'ALL' },
+    { id: 'reports', label: 'Reports', icon: BarChart3, role: 'ALL' },
+    { id: 'settings', label: 'Settings', icon: Settings, role: 'ADMIN' },
   ];
 
+  // Pages that should highlight the 'upload' or 'send' nav item
+  const wizardPageIds = new Set(['upload', 'send', 'notify-wizard']);
   const visibleNavItems = navItems.filter(item => item.role === 'ALL' || (item.role === 'ADMIN' && isAdmin));
 
   return (
     <div className="min-h-screen bg-[#FBF7F2] flex flex-col md:flex-row text-[#2B1B1B]">
       {/* Mobile Top Bar */}
-      <div className="md:hidden bg-gradient-to-r from-[#4A101E] to-[#1c060d] text-white px-4 py-3 flex items-center justify-between border-b border-[#7A1A2C]">
+      <div className="md:hidden bg-gradient-to-r from-[#4A101E] to-[#2D0811] text-white px-4 py-3 flex items-center justify-between border-b border-[#7A1A2C]">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-white p-0.5 flex items-center justify-center shadow-md border border-[#C08A16]/40 overflow-hidden shrink-0">
-            <img src="/app-logo.png" alt="App Logo" className="w-full h-full object-cover rounded-lg" />
+            <img src="/app-logo.png" alt="App Logo" className="w-full h-full object-contain rounded-lg" />
           </div>
           <div>
-            <div className="font-bold text-sm tracking-tight leading-none text-[#fff3b8]">CollegeMarks</div>
+            <div className="font-bold text-sm tracking-tight leading-none text-[#fff3b8]">CollegeSMS</div>
             <div className="text-[10px] text-[#F6C84C] font-semibold tracking-wide">VSB ENGINEERING COLLEGE</div>
           </div>
         </div>
@@ -136,8 +141,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         {/* Mobile Profile Dropdown Overlay */}
         {profileDropdownOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-[#4A101E] border-b border-[#7A1A2C] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 text-left">
-            <div className="flex items-center gap-3 pb-3 border-b border-[#7A1A2C]">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-[#2D0811] border-b border-[#7A1A2C] p-4 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+            <div className="flex items-center gap-3 pb-3 border-b border-[#7A1A2C]/60">
               <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#7A1A2C] to-[#C08A16] flex items-center justify-center text-[#fff3b8] font-extrabold text-base ring-2 ring-[#F6C84C]/40">
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </div>
@@ -146,7 +151,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <div className="text-xs text-[#fbeec4]/70 truncate">{user?.email}</div>
                 <div className="mt-1 flex items-center gap-2">
                   <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                    isAdmin ? 'bg-[#C08A16]/30 text-[#F6C84C]' : 'bg-[#7A1A2C]/50 text-[#fff3b8]'
+                    isAdmin ? 'bg-[#C08A16]/30 text-[#F6C84C]' : 'bg-[#7A1A2C]/60 text-[#fff3b8]'
                   }`}>
                     <Shield className="w-2.5 h-2.5 mr-1" />
                     {user?.role}
@@ -213,51 +218,55 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         )}
       </div>
 
-      {/* Sidebar Navigation */}
+      {/* Sidebar Navigation – Dark Burgundy Institutional Canvas */}
       <aside className={`
         ${mobileMenuOpen ? 'block' : 'hidden'} md:flex
-        w-full md:w-64 bg-white text-[#2B1B1B] flex-col shrink-0 border-r border-[#EADFD3] z-30 shadow-sm relative
+        w-full md:w-64 bg-gradient-to-b from-[#2D0811] via-[#4A101E] to-[#2D0811] text-white flex-col shrink-0 border-r border-[#631524]/60 z-30 shadow-xl relative
       `}>
-        {/* Branding */}
-        <div className="p-5 border-b border-[#EADFD3] hidden md:flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-white p-0.5 flex items-center justify-center shadow-md border border-[#EADFD3] shrink-0 ring-1 ring-[#C08A16]/30 overflow-hidden">
-            <img src="/app-logo.png" alt="College Marks App Logo" className="w-full h-full object-cover rounded-xl" />
+        {/* Branding Header */}
+        <div className="p-5 border-b border-[#631524]/60 hidden md:flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-white p-0.5 flex items-center justify-center shadow-lg border border-[#C08A16]/50 shrink-0 ring-2 ring-[#C08A16]/40 overflow-hidden">
+            <img src="/app-logo.png" alt="College Logo" className="w-full h-full object-contain rounded-xl" />
           </div>
-          <div>
-            <h1 className="font-heading font-black text-lg tracking-tight text-[#7A1A2C] leading-tight">
+          <div className="min-w-0">
+            <h1 className="font-heading font-black text-lg tracking-tight text-white leading-tight flex items-center gap-1.5">
               CollegeSMS
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#C08A16] text-[#2D0811] font-mono font-extrabold uppercase">v2</span>
             </h1>
-            <p className="text-[11px] text-[#C08A16] font-bold tracking-tight">VSB Engineering College</p>
+            <p className="text-[10px] text-[#F6C84C] font-semibold tracking-wide truncate">VSB ENGINEERING COLLEGE</p>
           </div>
         </div>
 
         {/* User Card */}
-        <div className="px-4 py-3 border-b border-[#EADFD3] bg-[#FBF7F2]/80">
+        <div className="px-4 py-3 border-b border-[#631524]/40 bg-[#1c060d]/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#7A1A2C] to-[#4A101E] flex items-center justify-center text-[#fff3b8] font-bold text-xs shadow-sm border border-[#C08A16]/40">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#7A1A2C] to-[#C08A16] flex items-center justify-center text-[#fff3b8] font-bold text-xs shadow-md border border-[#F6C84C]/40">
               {user?.name?.charAt(0) || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-[#2B1B1B] truncate">{user?.name}</div>
+              <div className="text-xs font-bold text-white truncate">{user?.name}</div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
                   isAdmin
-                    ? 'bg-[#C08A16]/15 text-[#7A1A2C] border border-[#C08A16]/30'
-                    : 'bg-[#7A1A2C]/10 text-[#7A1A2C] border border-[#7A1A2C]/20'
+                    ? 'bg-[#C08A16]/30 text-[#F6C84C] border border-[#C08A16]/50'
+                    : 'bg-[#7A1A2C] text-[#fff3b8] border border-[#F6C84C]/30'
                 }`}>
-                  <Shield className="w-2.5 h-2.5 mr-1 text-[#C08A16]" />
+                  <Shield className="w-2.5 h-2.5 mr-1 text-[#F6C84C]" />
                   {user?.role}
                 </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2E7D32]"></span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Nav Links */}
-        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activePage === item.id;
+            const isActive = (item.id === 'upload' || item.id === 'send')
+              ? (activePage === item.id || (item.id === 'send' && activePage === 'notify-wizard'))
+              : activePage === item.id;
             return (
               <button
                 key={item.id}
@@ -265,19 +274,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   onNavigate(item.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-200 group ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group text-left ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#7A1A2C] to-[#4A101E] text-[#fff3b8] shadow-md shadow-[#7A1A2C]/25 border border-[#C08A16]/30'
-                    : 'text-[#7A6A63] hover:bg-[#FBF7F2] hover:text-[#7A1A2C]'
+                    ? 'bg-gradient-to-r from-[#7A1A2C] to-[#631524] text-white shadow-md shadow-[#2D0811]/50 border-l-4 border-[#F6C84C]'
+                    : 'text-white/75 hover:bg-[#631524]/40 hover:text-white'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-[#F6C84C]' : 'text-[#7A6A63] group-hover:text-[#7A1A2C]'}`} />
-                  <span className="font-semibold tracking-tight">{item.label}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#F6C84C]' : 'text-white/60 group-hover:text-[#F6C84C]'}`} />
+                  <span className="truncate">{item.label}</span>
                 </div>
                 {item.badge && (
                   <span className={`text-[9px] px-2 py-0.5 rounded-full font-mono font-bold uppercase tracking-wider ${
-                    isActive ? 'bg-[#C08A16] text-[#fff3b8]' : 'bg-[#F6C84C]/20 text-[#7A1A2C] border border-[#C08A16]/30'
+                    isActive ? 'bg-[#F6C84C] text-[#2D0811]' : 'bg-[#C08A16]/30 text-[#F6C84C] border border-[#C08A16]/40'
                   }`}>
                     {item.badge}
                   </span>
@@ -288,10 +297,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </nav>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-[#EADFD3]">
+        <div className="p-3 border-t border-[#631524]/60 bg-[#1c060d]/60">
           <button
             onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-[#7A6A63] hover:bg-red-50 hover:text-[#C62828] transition-all border border-transparent hover:border-red-200"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-300 hover:bg-red-500/20 hover:text-white transition-all border border-transparent hover:border-red-500/30"
           >
             <LogOut className="w-3.5 h-3.5" />
             Sign Out
@@ -301,20 +310,42 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Header */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-[#EADFD3] px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div>
-              <h2 className="font-heading text-xl font-bold text-[#2B1B1B] capitalize flex items-center gap-2 tracking-tight">
+        {/* Top Header – Warm Ivory / White Canvas with subtle borders */}
+        <header className="bg-white/95 backdrop-blur-md border-b border-[#EADFD3] px-6 py-3.5 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+          {/* Left: Breadcrumbs & Academic Year Info */}
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 text-xs text-[#7A6A63] font-medium">
+                <span className="hover:text-[#7A1A2C] cursor-pointer" onClick={() => onNavigate('dashboard')}>CollegeSMS</span>
+                <span>/</span>
+                <span className="font-bold text-[#2B1B1B]">
+                  {visibleNavItems.find(i => i.id === activePage)?.label || 'Dashboard'}
+                </span>
+              </div>
+              <h2 className="font-heading text-lg font-bold text-[#2B1B1B] capitalize tracking-tight mt-0.5">
                 {visibleNavItems.find(i => i.id === activePage)?.label || 'Dashboard'}
               </h2>
-              <p className="text-xs text-[#7A6A63] font-medium mt-0.5">
-                Academic Year 2026–2027 • Internal Exam Management System
-              </p>
+            </div>
+
+            {/* Academic Year Badge */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-[#F5EFE8] border border-[#EADFD3] text-[11px] font-semibold text-[#7A6A63]">
+              <GraduationCap className="w-3.5 h-3.5 text-[#C08A16]" />
+              <span>AY 2024–25 • Even Semester</span>
             </div>
           </div>
 
+          {/* Right: Quick actions, notifications, user profile */}
           <div className="flex items-center gap-3">
+            {/* Notification History quick link */}
+            <button
+              onClick={() => onNavigate('notifications')}
+              className="p-2 rounded-xl text-[#7A6A63] hover:text-[#7A1A2C] hover:bg-[#F5EFE8] transition-colors relative border border-transparent hover:border-[#EADFD3]"
+              title="Notifications History"
+            >
+              <Send className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#2E7D32]"></span>
+            </button>
+
             {/* Separate Profile Circle & Account Dropdown */}
             <div className="relative" ref={profileDropdownRef}>
               <button
@@ -328,7 +359,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               >
                 {/* Distinct Profile Circle Avatar */}
                 <div className="relative">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#7A1A2C] to-[#C08A16] flex items-center justify-center text-[#fff3b8] font-bold text-sm shadow-sm ring-2 ring-[#F6C84C]/40 group-hover:ring-[#F6C84C] transition-all group-hover:scale-105">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#7A1A2C] to-[#C08A16] flex items-center justify-center text-[#fff3b8] font-bold text-sm shadow-sm ring-2 ring-[#F6C84C]/40 group-hover:ring-[#F6C84C] transition-all">
                     {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </div>
                   {/* Status Indicator Dot */}

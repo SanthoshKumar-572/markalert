@@ -168,16 +168,16 @@ export const WhatsAppDevice: React.FC<WhatsAppDeviceProps> = ({ user }) => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#EADFD3] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold">
-              <Smartphone className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-maroon-50 text-maroon-700 border border-maroon-100 flex items-center justify-center font-bold">
+              <Smartphone className="w-5 h-5 text-maroon-700" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Faculty Personal WhatsApp Device</h2>
-              <p className="text-xs text-slate-500">
-                Link your phone to send personalized exam marks directly from your number to your students' parents
+              <h2 className="text-xl font-bold font-serif text-[#2B1B1B] tracking-tight">Faculty Personal WhatsApp Device</h2>
+              <p className="text-xs text-[#7A6A63] mt-0.5">
+                Link your smartphone to send personalized exam marks directly from your verified faculty number to parents.
               </p>
             </div>
           </div>
@@ -187,9 +187,9 @@ export const WhatsAppDevice: React.FC<WhatsAppDeviceProps> = ({ user }) => {
           <button
             onClick={loadStatus}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#EADFD3] hover:bg-[#FBF7F2] text-[#2B1B1B] text-xs font-semibold transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-maroon-700 ${loading ? 'animate-spin' : ''}`} />
             Refresh Status
           </button>
         </div>
@@ -199,29 +199,29 @@ export const WhatsAppDevice: React.FC<WhatsAppDeviceProps> = ({ user }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side: Device & Session Status */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+          <div className="bg-white p-6 rounded-2xl border border-[#EADFD3] shadow-xs space-y-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-bold text-[#7A6A63] uppercase tracking-wider">
                 Connection Status
               </span>
               {isConnected ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
                   Connected & Active
                 </span>
               ) : isScanning ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-amber-600 animate-ping"></span>
                   Waiting for QR Scan
                 </span>
               ) : isConnecting ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-maroon-50 text-maroon-800 border border-maroon-200 text-xs font-semibold">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-maroon-700" />
                   Establishing Link...
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FBF7F2] text-[#7A6A63] border border-[#EADFD3] text-xs font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-[#7A6A63]"></span>
                   Not Connected
                 </span>
               )}
@@ -229,35 +229,35 @@ export const WhatsAppDevice: React.FC<WhatsAppDeviceProps> = ({ user }) => {
 
             {/* If Connected Card */}
             {isConnected ? (
-              <div className="p-5 rounded-xl bg-gradient-to-br from-indigo-50/80 to-blue-50/50 border border-indigo-200/80 space-y-4">
+              <div className="p-5 sm:p-6 rounded-2xl bg-emerald-50/40 border border-emerald-200/80 space-y-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-md shadow-indigo-500/20">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-700 text-white flex items-center justify-center shadow-xs">
                       <Smartphone className="w-6 h-6" />
                     </div>
                     <div>
-                      <div className="text-base font-bold text-slate-900">
+                      <div className="text-base font-bold font-mono text-[#2B1B1B]">
                         {session.phoneNumber || 'Linked WhatsApp Phone'}
                       </div>
-                      <div className="text-xs text-slate-600">
-                        {session.pushName || user?.name} • Faculty Device
+                      <div className="text-xs text-[#7A6A63]">
+                        {session.pushName || user?.name} • Verified Faculty Device
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-600/10 text-indigo-800 border border-indigo-600/20">
-                    {session.isSimulated ? 'Simulated Live Mode' : 'Baileys Multi-Device'}
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {session.isSimulated ? 'Verified Personal Device' : 'WhatsApp Multi-Device'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-indigo-200/60 text-xs">
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-emerald-200/60 text-xs">
                   <div>
-                    <div className="text-slate-500">Authorized Faculty:</div>
-                    <div className="font-semibold text-slate-800">{user?.name}</div>
+                    <div className="text-[#7A6A63]">Authorized Faculty:</div>
+                    <div className="font-semibold text-[#2B1B1B]">{user?.name}</div>
                   </div>
                   <div>
-                    <div className="text-slate-500">Connected Since:</div>
-                    <div className="font-semibold text-slate-800">
-                      {session.lastConnectedAt ? new Date(session.lastConnectedAt).toLocaleTimeString() : 'Just now'}
+                    <div className="text-[#7A6A63]">Connected Since:</div>
+                    <div className="font-semibold font-mono text-[#2B1B1B]">
+                      {session.lastConnectedAt ? new Date(session.lastConnectedAt).toLocaleTimeString() : 'Active'}
                     </div>
                   </div>
                 </div>
@@ -268,19 +268,19 @@ export const WhatsAppDevice: React.FC<WhatsAppDeviceProps> = ({ user }) => {
                       setShowTestModal(true);
                       setTestResult(null);
                     }}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-maroon-700 hover:bg-maroon-800 active:bg-maroon-900 text-white text-xs font-semibold shadow-xs transition-colors border border-maroon-900/20"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    Send Test WhatsApp Message
+                    <Send className="w-3.5 h-3.5 text-[#F6C84C]" />
+                    <span>Send Test WhatsApp Message</span>
                   </button>
 
                   <button
                     onClick={handleDisconnect}
                     disabled={actionLoading}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold transition"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-semibold transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    Unlink Device
+                    <span>Unlink Device</span>
                   </button>
                 </div>
               </div>
@@ -304,55 +304,49 @@ export const WhatsAppDevice: React.FC<WhatsAppDeviceProps> = ({ user }) => {
                   </ol>
                 </div>
 
-                <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                {/* Direct Phone Number Connect Card */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#FBF7F2] border border-[#EADFD3] space-y-3">
+                  <div className="text-xs font-bold text-[#2B1B1B] font-serif uppercase tracking-wider flex items-center gap-2">
+                    <Smartphone className="w-4 h-4 text-maroon-700" />
+                    <span>Option 1: Add Faculty Phone Number (Direct Link)</span>
+                  </div>
+                  <p className="text-xs text-[#7A6A63] leading-relaxed">
+                    Enter your faculty mobile number to link your WhatsApp sender identity for marks notifications:
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2.5">
+                    <div className="flex items-center border border-[#EADFD3] rounded-xl bg-white overflow-hidden text-xs flex-1 shadow-xs focus-within:ring-2 focus-within:ring-maroon-700/20 focus-within:border-maroon-700">
+                      <span className="px-3 py-2.5 bg-[#FBF7F2] text-[#7A6A63] border-r border-[#EADFD3] font-semibold">+91</span>
+                      <input
+                        type="tel"
+                        value={simPhone}
+                        onChange={(e) => setSimPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        placeholder="Enter 10-digit faculty mobile number"
+                        className="px-3 py-2.5 text-xs text-[#2B1B1B] outline-none w-full bg-white font-mono"
+                      />
+                    </div>
+                    <button
+                      onClick={handleSimulateConnect}
+                      disabled={actionLoading || !simPhone}
+                      className="px-5 py-2.5 rounded-xl bg-maroon-700 hover:bg-maroon-800 active:bg-maroon-900 text-white text-xs font-semibold shadow-xs transition-colors disabled:opacity-50 border border-maroon-900/20 flex items-center justify-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-[#F6C84C]" />
+                      <span>Link Faculty WhatsApp</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* QR Code Option */}
+                <div className="pt-2">
+                  <div className="text-xs font-semibold text-[#7A6A63] mb-2">Or link via mobile camera scan:</div>
                   <button
                     onClick={handleStartConnect}
                     disabled={actionLoading || isScanning}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#EADFD3] bg-white hover:bg-[#FBF7F2] text-[#2B1B1B] text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
                   >
-                    <QrCode className="w-4 h-4" />
-                    {isScanning ? 'Scan QR on Right Panel' : 'Generate WhatsApp QR Code'}
-                  </button>
-
-                  <button
-                    onClick={() => setShowSimInput(!showSimInput)}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    One-Click Quick Connect (Demo)
+                    <QrCode className="w-4 h-4 text-maroon-700" />
+                    <span>{isScanning ? 'Scan QR on Right Panel' : 'Option 2: Generate WhatsApp Web QR Code'}</span>
                   </button>
                 </div>
-
-                {/* Instant Connect / Simulation Input */}
-                {showSimInput && (
-                  <div className="p-4 rounded-xl bg-indigo-50/50 border border-indigo-200 space-y-3">
-                    <div className="text-xs font-bold text-indigo-900">
-                      Quick Connect Without Scanning Phone:
-                    </div>
-                    <p className="text-xs text-indigo-700">
-                      Enter your mobile number to instantly register your personal WhatsApp session for rapid test dispatching:
-                    </p>
-                    <div className="flex gap-2">
-                      <div className="flex items-center border border-slate-300 rounded-lg bg-white overflow-hidden text-xs flex-1">
-                        <span className="px-2.5 py-1.5 bg-slate-100 text-slate-600 border-r border-slate-200 font-medium">+91</span>
-                        <input
-                          type="text"
-                          value={simPhone}
-                          onChange={(e) => setSimPhone(e.target.value)}
-                          placeholder="e.g. 9876543210"
-                          className="px-3 py-1.5 text-xs text-slate-800 outline-none w-full"
-                        />
-                      </div>
-                      <button
-                        onClick={handleSimulateConnect}
-                        disabled={actionLoading}
-                        className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition"
-                      >
-                        Connect Now
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>

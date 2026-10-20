@@ -47,14 +47,30 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   };
 
   const baseUrl = getApiBaseUrl();
-  const res = await fetch(`${baseUrl}${endpoint}`, {
-    ...options,
-    headers
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${baseUrl}${endpoint}`, {
+      ...options,
+      headers
+    });
+  } catch (err: any) {
+    throw new Error('Unable to connect to the backend server. Please verify the server is running.');
+  }
 
-  const data = await res.json();
+  const text = await res.text();
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(
+      !res.ok
+        ? `Server error (${res.status}: ${res.statusText || 'Backend service unavailable'})`
+        : 'Invalid response received from server'
+    );
+  }
+
   if (!res.ok || data.success === false) {
-    throw new Error(data.error || 'Network request failed');
+    throw new Error(data.error || data.message || `Request failed (${res.status})`);
   }
 
   return data;

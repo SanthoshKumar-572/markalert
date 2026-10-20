@@ -25,7 +25,7 @@ export const rawStudentList = [
   { sNo: 19, name: 'Sanjay S', regNo: '922524205143', phone: '9489841868' },
   { sNo: 20, name: 'Sanjeevani M M', regNo: '922524205144', phone: '9003459989' },
   { sNo: 21, name: 'Santhiya B K', regNo: '922524205145', phone: '9080751908' },
-  { sNo: 22, name: 'Santhosh Kumar R', regNo: '922524205146', phone: '8072752322' },
+  { sNo: 22, name: 'Santhoshkumar R', regNo: '922524205146', phone: '6383474523' },
   { sNo: 23, name: 'Santhosh S', regNo: '922524205147', phone: '8807854679' },
   { sNo: 24, name: 'Santhoshkumar S', regNo: '922524205148', phone: '9487528706' },
   { sNo: 25, name: 'Saravanan P', regNo: '922524205149', phone: '8072117461' },
@@ -70,10 +70,10 @@ export async function importStudentListToDatabase() {
   console.log('[Import] Initializing database connection...');
   await db.init();
 
-  const classId = 'class-it-a';
+  const classId = 'class-it-c';
   const deptId = 'dept-it';
   const year = '3';
-  const section = 'A';
+  const section = 'C';
   const academicYear = '2026-27';
 
   // Ensure IT Department & Class IT-A exist
@@ -117,9 +117,9 @@ export async function importStudentListToDatabase() {
       insertedCount++;
     } else {
       await db.execute(
-        `UPDATE students SET name = ?, parent_name = ?, parent_phone = ?, class_id = ?, department_id = ?, section = ?
+        `UPDATE students SET name = ?, parent_name = ?, parent_phone = ?, class_id = ?, department_id = ?, section = ?, year = ?
          WHERE register_number = ?`,
-        [std.name, parentName, cleanPhone, classId, deptId, section, std.regNo]
+        [std.name, parentName, cleanPhone, classId, deptId, section, year, std.regNo]
       );
 
       await db.execute(

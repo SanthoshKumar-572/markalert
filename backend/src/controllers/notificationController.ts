@@ -132,7 +132,7 @@ export async function getNotifications(req: Request, res: Response): Promise<voi
 
     let queryStr = `
       SELECT n.*, s.register_number, s.name as student_name, ex.exam_name,
-             p.parent_name
+             p.parent_name, p.mobile_number as parent_mobile, p.whatsapp_number as parent_whatsapp
       FROM notifications n
       JOIN students s ON n.student_id = s.id
       JOIN exams ex ON n.exam_id = ex.id
@@ -180,15 +180,15 @@ export async function getNotifications(req: Request, res: Response): Promise<voi
 
     const notifications = await db.query<any>(queryStr, params);
 
-    // Mask phone numbers for non-admin viewers (******3210)
-    const isAdmin = req.user?.role === 'ADMIN';
+    // Provide recipient_masked for UI display and recipient_raw for direct SMS/WhatsApp links
     const sanitized = notifications.map(n => {
-      const rec = n.recipient || '';
-      const masked = rec.length >= 4 ? '******' + rec.slice(-4) : '******';
+      const realPhone = n.recipient || n.parent_mobile || n.parent_whatsapp || '';
+      const masked = realPhone.length >= 4 ? '******' + realPhone.slice(-4) : '******';
       return {
         ...n,
         recipient_masked: masked,
-        recipient: isAdmin ? n.recipient : masked
+        recipient_raw: realPhone,
+        recipient: realPhone
       };
     });
 
@@ -205,7 +205,8 @@ export async function getNotificationById(req: Request, res: Response): Promise<
     const user = req.user;
     const notif = await db.queryOne<any>(
       `SELECT n.*, s.register_number, s.name as student_name, s.class_id as student_class_id,
-              ex.exam_name, ex.class_id as exam_class_id, p.parent_name
+              ex.exam_name, ex.class_id as exam_class_id, p.parent_name,
+              p.mobile_number as parent_mobile, p.whatsapp_number as parent_whatsapp
        FROM notifications n
        JOIN students s ON n.student_id = s.id
        JOIN exams ex ON n.exam_id = ex.id
@@ -230,16 +231,16 @@ export async function getNotificationById(req: Request, res: Response): Promise<
       }
     }
 
-    const isAdmin = req.user?.role === 'ADMIN';
-    const rec = notif.recipient || '';
-    const masked = rec.length >= 4 ? '******' + rec.slice(-4) : '******';
+    const realPhone = notif.recipient || notif.parent_mobile || notif.parent_whatsapp || '';
+    const masked = realPhone.length >= 4 ? '******' + realPhone.slice(-4) : '******';
 
     res.json({
       success: true,
       data: {
         ...notif,
         recipient_masked: masked,
-        recipient: isAdmin ? notif.recipient : masked
+        recipient_raw: realPhone,
+        recipient: realPhone
       }
     });
   } catch (err: any) {

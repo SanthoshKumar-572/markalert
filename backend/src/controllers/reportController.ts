@@ -14,18 +14,22 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
       const studentCountRow = await db.queryOne<any>('SELECT COUNT(*) as cnt FROM students');
       const examCountRow = await db.queryOne<any>('SELECT COUNT(*) as cnt FROM exams');
 
+      const marksCountRow = await db.queryOne<any>('SELECT COUNT(*) as cnt FROM marks');
+
       // Count distinct unique recipient numbers so sending twice to the same number does not double count
       const notifStats = await db.queryOne<any>(`
         SELECT 
           COUNT(DISTINCT recipient) as unique_total,
           COUNT(DISTINCT CASE WHEN status IN ('SENT', 'DELIVERED') THEN recipient END) as unique_delivered,
-          COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN recipient END) as unique_failed
+          COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN recipient END) as unique_failed,
+          COUNT(DISTINCT CASE WHEN status IN ('PENDING', 'QUEUED', 'RETRYING') THEN recipient END) as unique_pending
         FROM notifications
       `);
 
       const totalNotifications = notifStats?.unique_total || 0;
       const deliveredCount = notifStats?.unique_delivered || 0;
       const failedCount = notifStats?.unique_failed || 0;
+      const pendingCount = notifStats?.unique_pending || 0;
 
       const recentUploads = await db.query<any>(`
         SELECT u.*, us.name as uploaded_by_name
@@ -62,8 +66,10 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
           classesCount: classCountRow?.cnt || 0,
           studentsCount: studentCountRow?.cnt || 0,
           examsCount: examCountRow?.cnt || 0,
+          marksCount: marksCountRow?.cnt || 0,
           notificationsSent: totalNotifications,
           deliveredCount: deliveredCount,
+          pendingCount: pendingCount,
           failedCount: failedCount,
           recentUploads,
           recentBatches,
@@ -115,12 +121,21 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
         SELECT COUNT(*) as cnt FROM exams WHERE class_id IN (${placeholders})
       `, assignedClassIds);
 
+      // Marks count in faculty's assigned classes
+      const marksCountRow = await db.queryOne<any>(`
+        SELECT COUNT(*) as cnt 
+        FROM marks m
+        JOIN students s ON m.student_id = s.id
+        WHERE s.class_id IN (${placeholders})
+      `, assignedClassIds);
+
       // Notification stats for faculty's students (distinct recipients)
       const notifStats = await db.queryOne<any>(`
         SELECT 
           COUNT(DISTINCT n.recipient) as unique_total,
           COUNT(DISTINCT CASE WHEN n.status IN ('SENT', 'DELIVERED') THEN n.recipient END) as unique_delivered,
-          COUNT(DISTINCT CASE WHEN n.status = 'FAILED' THEN n.recipient END) as unique_failed
+          COUNT(DISTINCT CASE WHEN n.status = 'FAILED' THEN n.recipient END) as unique_failed,
+          COUNT(DISTINCT CASE WHEN n.status IN ('PENDING', 'QUEUED', 'RETRYING') THEN n.recipient END) as unique_pending
         FROM notifications n
         JOIN students s ON n.student_id = s.id
         WHERE s.class_id IN (${placeholders})
@@ -129,6 +144,7 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
       const totalNotifications = notifStats?.unique_total || 0;
       const deliveredCount = notifStats?.unique_delivered || 0;
       const failedCount = notifStats?.unique_failed || 0;
+      const pendingCount = notifStats?.unique_pending || 0;
 
       const recentBatches = await db.query<any>(`
         SELECT b.*, ex.exam_name, us.name as created_by_name
@@ -167,8 +183,10 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
           assignedClasses,
           studentsCount: studentCountRow?.cnt || 0,
           examsCount: examCountRow?.cnt || 0,
+          marksCount: marksCountRow?.cnt || 0,
           notificationsSent: totalNotifications,
           deliveredCount: deliveredCount,
+          pendingCount: pendingCount,
           failedCount: failedCount,
           recentBatches,
           recentFailures: sanitizedFailures

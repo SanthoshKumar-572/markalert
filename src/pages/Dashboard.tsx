@@ -137,102 +137,324 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate, user }) => {
         </div>
       )}
 
-      {/* Row 1: 4 Stat Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-        {/* Card 1: Students */}
-        <div className="bg-white rounded-3xl p-6 border border-[#EADFD3] shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#7A1A2C] to-[#4A101E] flex items-center justify-center text-[#fff3b8] shadow-md shadow-[#7A1A2C]/20 border border-[#C08A16]/30">
-            <Users className="w-6 h-6 text-[#fff3b8]" />
-          </div>
-          <div className="space-y-1">
-            <div className="text-3xl md:text-4xl font-display font-extrabold text-[#2B1B1B] tracking-tight">
-              {stats?.studentsCount ?? 5}
+      {/* Row 1: 4 Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Card 1: Total Students */}
+        <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs hover:border-[#C08A16]/50 hover:shadow-sm transition-all duration-150 flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#7A1A2C] to-[#4A101E] flex items-center justify-center text-white shadow-sm border border-[#C08A16]/30">
+              <Users className="w-5 h-5 text-[#fff3b8]" />
             </div>
-            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide">
-              Students
-            </div>
+            <span className="text-[10px] font-mono font-bold text-[#7A1A2C] bg-[#7A1A2C]/10 px-2 py-0.5 rounded-full border border-[#7A1A2C]/20">
+              Active Roster
+            </span>
           </div>
-        </div>
-
-        {/* Card 2: Subjects / Classes */}
-        <div className="bg-white rounded-3xl p-6 border border-[#EADFD3] shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C08A16] to-[#7a5209] flex items-center justify-center text-white shadow-md shadow-[#C08A16]/20">
-            <BookOpen className="w-6 h-6 text-[#fff3b8]" />
-          </div>
-          <div className="space-y-1">
-            <div className="text-3xl md:text-4xl font-display font-extrabold text-[#2B1B1B] tracking-tight">
-              {stats?.classesCount ?? 6}
+          <div>
+            <div className="text-3xl font-heading font-extrabold text-[#2B1B1B] tracking-tight">
+              {stats?.studentsCount ?? 0}
             </div>
-            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide">
-              Subjects
+            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide mt-0.5">
+              Total Students
             </div>
           </div>
         </div>
 
-        {/* Card 3: Exams */}
-        <div className="bg-white rounded-3xl p-6 border border-[#EADFD3] shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4A101E] to-[#1c060d] flex items-center justify-center text-[#F6C84C] shadow-md shadow-black/15 border border-[#F6C84C]/30 font-black">
-            <FileSpreadsheet className="w-6 h-6 text-[#F6C84C]" />
-          </div>
-          <div className="space-y-1">
-            <div className="text-3xl md:text-4xl font-display font-extrabold text-[#2B1B1B] tracking-tight">
-              {stats?.examsCount ?? 1}
+        {/* Card 2: Marks Uploaded */}
+        <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs hover:border-[#C08A16]/50 hover:shadow-sm transition-all duration-150 flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#C08A16] to-[#7a5209] flex items-center justify-center text-white shadow-sm border border-[#F6C84C]/40">
+              <FileSpreadsheet className="w-5 h-5 text-[#fff3b8]" />
             </div>
-            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide">
-              Exams
+            <span className="text-[10px] font-mono font-bold text-[#C08A16] bg-[#FEF9C3] px-2 py-0.5 rounded-full border border-[#C08A16]/30">
+              Assessments
+            </span>
+          </div>
+          <div>
+            <div className="text-3xl font-heading font-extrabold text-[#2B1B1B] tracking-tight">
+              {stats?.marksCount ?? 0}
+            </div>
+            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide mt-0.5">
+              Marks Uploaded
             </div>
           </div>
         </div>
 
-        {/* Card 4: Notifications Sent */}
-        <div className="bg-white rounded-3xl p-6 border border-[#EADFD3] shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2E7D32] to-[#1b5e20] flex items-center justify-center text-white shadow-md shadow-[#2E7D32]/20">
-            <Send className="w-6 h-6 text-white" />
-          </div>
-          <div className="space-y-1">
-            <div className="text-3xl md:text-4xl font-display font-extrabold text-[#2B1B1B] tracking-tight">
-              {stats?.notificationsSent ?? 0}
+        {/* Card 3: Notifications Delivered */}
+        <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs hover:border-[#C08A16]/50 hover:shadow-sm transition-all duration-150 flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E7D32] to-[#1b5e20] flex items-center justify-center text-white shadow-sm">
+              <CheckCheck className="w-5 h-5 text-white" />
             </div>
-            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide">
-              Notifications Sent
+            <span className="text-[10px] font-mono font-bold text-[#2E7D32] bg-[#2E7D32]/10 px-2 py-0.5 rounded-full border border-[#2E7D32]/20">
+              {stats && stats.notificationsSent > 0 ? `${successRate}% Success` : '100% Verified'}
+            </span>
+          </div>
+          <div>
+            <div className="text-3xl font-heading font-extrabold text-[#2B1B1B] tracking-tight">
+              {stats?.deliveredCount ?? 0}
+            </div>
+            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide mt-0.5">
+              Notifications Delivered
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Notifications Pending */}
+        <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs hover:border-[#C08A16]/50 hover:shadow-sm transition-all duration-150 flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#D97706] to-[#92400e] flex items-center justify-center text-white shadow-sm">
+              <Clock className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[10px] font-mono font-bold text-[#D97706] bg-[#FEF9C3] px-2 py-0.5 rounded-full border border-[#D97706]/30">
+              Queue Status
+            </span>
+          </div>
+          <div>
+            <div className="text-3xl font-heading font-extrabold text-[#2B1B1B] tracking-tight">
+              {stats?.pendingCount ?? Math.max(0, (stats?.notificationsSent ?? 0) - (stats?.deliveredCount ?? 0) - (stats?.failedCount ?? 0))}
+            </div>
+            <div className="text-xs text-[#7A6A63] font-semibold tracking-wide mt-0.5">
+              Notifications Pending
             </div>
           </div>
         </div>
       </div>
 
-
-      {/* Extra Faculty Class Quick-Access (if assigned) */}
-      {assignedClasses && assignedClasses.length > 0 && (
-        <div className="bg-white rounded-3xl p-6 border border-[#EADFD3] shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-[#7A1A2C]" />
-              <h3 className="text-sm font-display font-bold text-[#2B1B1B]">Your Assigned Classes</h3>
+      {/* Row 2: Quick Action Shortcuts */}
+      <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#C08A16]" />
+            <h3 className="text-sm font-heading font-bold text-[#2B1B1B]">Faculty Quick Actions</h3>
+          </div>
+          <span className="text-[11px] text-[#7A6A63]">Common workflow shortcuts</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <button
+            onClick={() => onNavigate('upload')}
+            className="p-3.5 rounded-xl border border-[#EADFD3] bg-[#FBF7F2] hover:bg-white hover:border-[#7A1A2C] transition-all text-left group flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#7A1A2C] text-[#fff3b8] flex items-center justify-center shrink-0">
+                <Send className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-[#2B1B1B] group-hover:text-[#7A1A2C] transition-colors">Notify Wizard</div>
+                <div className="text-[10px] text-[#7A6A63]">Upload & Send marks</div>
+              </div>
             </div>
-            <span className="px-3 py-1 rounded-full bg-[#FBF7F2] text-[#7A1A2C] border border-[#EADFD3] text-xs font-mono font-bold">
-              {assignedClasses.length} {assignedClasses.length === 1 ? 'Class' : 'Classes'}
-            </span>
+            <ArrowUpRight className="w-4 h-4 text-[#7A6A63] group-hover:text-[#7A1A2C] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => onNavigate('students')}
+            className="p-3.5 rounded-xl border border-[#EADFD3] bg-[#FBF7F2] hover:bg-white hover:border-[#7A1A2C] transition-all text-left group flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#4A101E] text-white flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-[#2B1B1B] group-hover:text-[#7A1A2C] transition-colors">Student Roster</div>
+                <div className="text-[10px] text-[#7A6A63]">Manage student records</div>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-[#7A6A63] group-hover:text-[#7A1A2C] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => onNavigate('templates')}
+            className="p-3.5 rounded-xl border border-[#EADFD3] bg-[#FBF7F2] hover:bg-white hover:border-[#7A1A2C] transition-all text-left group flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#C08A16] text-[#2B1B1B] flex items-center justify-center shrink-0">
+                <BookOpen className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-[#2B1B1B] group-hover:text-[#7A1A2C] transition-colors">Templates</div>
+                <div className="text-[10px] text-[#7A6A63]">SMS & WhatsApp formats</div>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-[#7A6A63] group-hover:text-[#7A1A2C] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+
+          <button
+            onClick={() => onNavigate('notifications')}
+            className="p-3.5 rounded-xl border border-[#EADFD3] bg-[#FBF7F2] hover:bg-white hover:border-[#7A1A2C] transition-all text-left group flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#2E7D32] text-white flex items-center justify-center shrink-0">
+                <History className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-[#2B1B1B] group-hover:text-[#7A1A2C] transition-colors">Dispatch Logs</div>
+                <div className="text-[10px] text-[#7A6A63]">Delivery status & audit</div>
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-[#7A6A63] group-hover:text-[#7A1A2C] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+        </div>
+      </div>
+
+      {/* Row 3: Recent Activity & Delivery Status Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column (2 cols): Recent Notification Batches & Upload Activity */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Recent Notification Dispatches */}
+          <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Send className="w-4 h-4 text-[#7A1A2C]" />
+                <h3 className="text-sm font-heading font-bold text-[#2B1B1B]">Recent Notification Dispatches</h3>
+              </div>
+              <button
+                onClick={() => onNavigate('notifications')}
+                className="text-xs font-semibold text-[#7A1A2C] hover:text-[#C08A16] transition-colors"
+              >
+                View all logs →
+              </button>
+            </div>
+
+            {stats?.recentBatches && stats.recentBatches.length > 0 ? (
+              <div className="divide-y divide-[#F3ECE4]">
+                {stats.recentBatches.map((batch: any) => (
+                  <div key={batch.id} className="py-3 flex items-center justify-between text-xs">
+                    <div>
+                      <div className="font-bold text-[#2B1B1B]">{batch.exam_name || 'Internal Assessment Exam'}</div>
+                      <div className="text-[11px] text-[#7A6A63] mt-0.5 font-mono">
+                        By {batch.created_by_name || 'Faculty'} • {new Date(batch.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#2E7D32]/10 text-[#2E7D32] border border-[#2E7D32]/20">
+                        {batch.successful_notifications || 0} / {batch.total_notifications || 0} Delivered
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-xs text-[#7A6A63] border border-dashed border-[#EADFD3] rounded-xl">
+                No notification dispatches yet. Use the Notify Wizard to send marks.
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            {assignedClasses.map((cls) => (
-              <div
-                key={cls.id}
-                onClick={() => onNavigate('students')}
-                className="p-4 rounded-2xl bg-[#FBF7F2]/60 hover:bg-[#FBF7F2] border border-[#EADFD3] hover:border-[#C08A16] transition-all cursor-pointer flex items-center justify-between group"
-              >
-                <div>
-                  <div className="text-sm font-bold text-[#2B1B1B] group-hover:text-[#7A1A2C] transition-colors">{cls.name}</div>
-                  <div className="text-xs text-[#7A6A63] mt-0.5">{cls.department_name || cls.department_code || 'IT'} • Semester {cls.semester || '5'}</div>
+          {/* Assigned Classes Quick List */}
+          {assignedClasses && assignedClasses.length > 0 && (
+            <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4 text-[#7A1A2C]" />
+                  <h3 className="text-sm font-heading font-bold text-[#2B1B1B]">Your Assigned Classes</h3>
                 </div>
-                <div className="text-xs font-mono font-bold text-[#7A1A2C] group-hover:text-[#C08A16] transition-colors">
-                  {cls.student_count || 0} students →
+                <span className="px-2.5 py-0.5 rounded-full bg-[#FBF7F2] text-[#7A1A2C] border border-[#EADFD3] text-[11px] font-mono font-bold">
+                  {assignedClasses.length} {assignedClasses.length === 1 ? 'Class' : 'Classes'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {assignedClasses.map((cls) => (
+                  <div
+                    key={cls.id}
+                    onClick={() => onNavigate('students')}
+                    className="p-3.5 rounded-xl bg-[#FBF7F2] hover:bg-white border border-[#EADFD3] hover:border-[#C08A16] transition-all cursor-pointer flex items-center justify-between group"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-[#2B1B1B] group-hover:text-[#7A1A2C] transition-colors">{cls.name}</div>
+                      <div className="text-[10px] text-[#7A6A63] mt-0.5">{cls.department_name || cls.department_code || 'IT'} • Semester {cls.semester || '5'}</div>
+                    </div>
+                    <div className="text-xs font-mono font-bold text-[#7A1A2C] group-hover:text-[#C08A16] transition-colors">
+                      {cls.student_count || 0} students →
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column: Delivery Status & System Health */}
+        <div className="space-y-6">
+          {/* Delivery Status Card */}
+          <div className="bg-white rounded-2xl p-5 border border-[#EADFD3] shadow-xs space-y-4">
+            <h3 className="text-sm font-heading font-bold text-[#2B1B1B]">Delivery Overview</h3>
+            
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-xs font-semibold mb-1">
+                  <span className="text-[#2B1B1B]">Delivered Messages</span>
+                  <span className="text-[#2E7D32] font-mono font-bold">{stats?.deliveredCount ?? 0}</span>
+                </div>
+                <div className="w-full h-2 bg-[#F5EFE8] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#2E7D32] rounded-full transition-all duration-300"
+                    style={{
+                      width: `${stats && stats.notificationsSent > 0 ? (stats.deliveredCount / stats.notificationsSent) * 100 : 100}%`
+                    }}
+                  />
                 </div>
               </div>
-            ))}
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold mb-1">
+                  <span className="text-[#2B1B1B]">Pending in Queue</span>
+                  <span className="text-[#D97706] font-mono font-bold">
+                    {stats?.pendingCount ?? Math.max(0, (stats?.notificationsSent ?? 0) - (stats?.deliveredCount ?? 0) - (stats?.failedCount ?? 0))}
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-[#F5EFE8] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#D97706] rounded-full transition-all duration-300"
+                    style={{
+                      width: `${stats && stats.notificationsSent > 0 ? ((stats.pendingCount || 0) / stats.notificationsSent) * 100 : 0}%`
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-semibold mb-1">
+                  <span className="text-[#2B1B1B]">Failed Dispatches</span>
+                  <span className="text-[#C62828] font-mono font-bold">{stats?.failedCount ?? 0}</span>
+                </div>
+                <div className="w-full h-2 bg-[#F5EFE8] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#C62828] rounded-full transition-all duration-300"
+                    style={{
+                      width: `${stats && stats.notificationsSent > 0 ? (stats.failedCount / stats.notificationsSent) * 100 : 0}%`
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[#F3ECE4] text-[11px] text-[#7A6A63] flex items-center justify-between">
+              <span>Overall Delivery Rate</span>
+              <span className="font-mono font-bold text-[#2B1B1B]">{successRate}%</span>
+            </div>
+          </div>
+
+          {/* Academic Portal Notice Card */}
+          <div className="bg-gradient-to-br from-[#7A1A2C] to-[#4A101E] rounded-2xl p-5 text-white border border-[#C08A16]/30 shadow-sm space-y-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#F6C84C]" />
+              <span className="text-xs font-bold text-[#F6C84C] uppercase tracking-wider">VSB College Notice</span>
+            </div>
+            <p className="text-xs text-white/90 leading-relaxed">
+              Internal Assessment II mark entries must be finalized and dispatched to parent phone numbers within 48 hours of test completion.
+            </p>
+            <div className="pt-2 border-t border-[#631524]">
+              <button
+                onClick={() => onNavigate('upload')}
+                className="w-full py-2 px-3 rounded-xl bg-white text-[#7A1A2C] font-bold text-xs hover:bg-[#FBF7F2] transition-colors"
+              >
+                Start New Notification Flow
+              </button>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

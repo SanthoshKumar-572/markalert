@@ -27,9 +27,10 @@ import { Student, Department, ClassItem } from '../types';
 
 interface StudentsProps {
   isAdmin: boolean;
+  onNavigateToUpload?: (deptId: string, classId: string) => void;
 }
 
-export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
+export const Students: React.FC<StudentsProps> = ({ isAdmin, onNavigateToUpload }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -373,15 +374,15 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="ai-glass-card p-6 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white p-6 rounded-2xl border border-[#EADFD3] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-xl font-display font-extrabold text-slate-900 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600">
+          <h2 className="text-xl font-heading font-extrabold text-[#2B1B1B] flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#7A1A2C]/10 flex items-center justify-center text-[#7A1A2C] border border-[#7A1A2C]/20">
               <Users className="w-5 h-5" />
             </div>
             <span>Student Directory</span>
           </h2>
-          <p className="text-xs text-slate-500 font-sans">
+          <p className="text-xs text-[#7A6A63] font-sans">
             Registered students, constant class rosters (set by Admin), and verified student contact records.
           </p>
         </div>
@@ -391,17 +392,17 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
             <button
               onClick={handleCleanDuplicates}
               disabled={cleaningDuplicates}
-              className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
+              className="px-3.5 py-2.5 rounded-xl border border-[#EADFD3] bg-white hover:bg-[#FBF7F2] text-[#2B1B1B] text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 disabled:opacity-50 active:scale-95"
               title="Scan and erase duplicate student registrations and orphan records"
             >
               {cleaningDuplicates ? (
                 <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-500" />
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#7A6A63]" />
                   <span>Cleaning...</span>
                 </>
               ) : (
                 <>
-                  <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                  <Trash2 className="w-3.5 h-3.5 text-[#C62828]" />
                   <span>Erase Duplicates</span>
                 </>
               )}
@@ -409,18 +410,18 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
 
             <button
               onClick={handleOpenMasterModal}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-2 active:scale-95"
+              className="px-4 py-2.5 rounded-xl bg-[#C08A16] hover:bg-[#9d6d0d] text-white text-xs font-bold shadow-sm transition-all flex items-center gap-2 border border-[#F6C84C]/30 active:scale-95"
               title="Upload constant Excel roster (Student Roll, Name, Student Mobile) for a class"
             >
-              <UploadCloud className="w-4 h-4 text-indigo-400" />
+              <UploadCloud className="w-4 h-4 text-[#fff3b8]" />
               <span>Upload Constant Class Excel</span>
             </button>
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5 active:scale-95"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#7A1A2C] to-[#4A101E] hover:from-[#631524] text-[#fff3b8] text-xs font-bold shadow-md shadow-[#7A1A2C]/20 transition-all flex items-center gap-1.5 border border-[#C08A16]/30 active:scale-95"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-[#F6C84C]" />
               <span>Add Single Student</span>
             </button>
           </div>
@@ -428,45 +429,45 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
       </div>
 
       {cleanResultMsg && (
-        <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 text-xs text-indigo-950 flex items-center justify-between shadow-xs">
+        <div className="p-4 rounded-xl bg-[#2E7D32]/10 border border-[#2E7D32]/30 text-xs text-[#2B1B1B] flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[#2E7D32] shrink-0" />
             <span className="font-bold font-sans">{cleanResultMsg}</span>
           </div>
-          <button onClick={() => setCleanResultMsg(null)} className="text-indigo-700 hover:text-indigo-950 font-bold text-xs">✕</button>
+          <button onClick={() => setCleanResultMsg(null)} className="text-[#7A6A63] hover:text-[#2B1B1B] font-bold text-xs">✕</button>
         </div>
       )}
 
       {/* Filter and Search Bar */}
-      <div className="ai-glass-card p-4.5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-white p-4.5 rounded-2xl border border-[#EADFD3] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#7A6A63] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by Name, Reg No..."
-              className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500 bg-white shadow-2xs"
+              className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-[#EADFD3] text-xs font-sans text-[#2B1B1B] focus:outline-none focus:ring-2 focus:ring-[#7A1A2C] bg-[#F5EFE8]"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-2xs active:scale-95"
+            className="px-3.5 py-2 rounded-xl bg-[#7A1A2C] text-[#fff3b8] text-xs font-bold hover:bg-[#631524] transition-colors shrink-0"
           >
             Search
           </button>
         </form>
 
-        <div className="flex items-center gap-3 overflow-x-auto text-xs">
-          <div className="flex items-center gap-1.5 text-slate-500 font-mono">
-            <Filter className="w-3.5 h-3.5" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-[#7A6A63] font-mono text-xs">
+            <Filter className="w-3.5 h-3.5 text-[#C08A16]" />
             <span className="font-bold">Dept:</span>
           </div>
           <select
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white shadow-2xs"
+            className="px-3 py-1.5 rounded-xl border border-[#EADFD3] text-xs font-semibold bg-white text-[#2B1B1B] shadow-2xs focus:ring-2 focus:ring-[#7A1A2C]"
           >
             <option value="">All Departments</option>
             {departments.map((d) => (
@@ -474,32 +475,44 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
             ))}
           </select>
 
-          <div className="flex items-center gap-1.5 text-slate-500 font-mono ml-2">
+          <div className="flex items-center gap-1.5 text-[#7A6A63] font-mono ml-2 text-xs">
             <span className="font-bold">Class:</span>
           </div>
           <select
             value={classFilter}
             onChange={(e) => setClassFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white shadow-2xs"
+            className="px-3 py-1.5 rounded-xl border border-[#EADFD3] text-xs font-semibold bg-white text-[#2B1B1B] shadow-2xs focus:ring-2 focus:ring-[#7A1A2C]"
           >
             <option value="">All Classes</option>
             {classes.map((c) => (
               <option key={c.id} value={c.id}>Year {c.year} - Sec {c.section}</option>
             ))}
           </select>
+
+          {/* Upload Marks shortcut — shown when a specific dept + class is filtered */}
+          {departmentFilter && classFilter && onNavigateToUpload && (
+            <button
+              onClick={() => onNavigateToUpload(departmentFilter, classFilter)}
+              className="ml-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#7A1A2C] hover:bg-[#631524] text-[#fff3b8] text-xs font-bold shadow-sm transition-all active:scale-95 border border-[#C08A16]/30"
+              title="Go to Upload Marks pre-filled with this department & class"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-[#F6C84C]" />
+              <span>Upload Marks</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Students Table */}
-      <div className="ai-glass-card rounded-3xl overflow-hidden border border-slate-200/80">
+      <div className="bg-white rounded-2xl overflow-hidden border border-[#EADFD3] shadow-xs">
         {loading ? (
           <div className="flex items-center justify-center min-h-[300px]">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-[#7A1A2C] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/90 border-b border-slate-200 text-slate-600 font-bold font-mono text-[11px] uppercase tracking-wider">
+              <thead className="bg-[#FBF7F2] border-b border-[#EADFD3] text-[#2B1B1B] font-bold font-mono text-[11px] uppercase tracking-wider">
                 <tr>
                   <th className="py-3.5 px-4">Register No</th>
                   <th className="py-3.5 px-4">Student Name</th>
@@ -511,7 +524,7 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100/80 font-medium">
+              <tbody className="divide-y divide-[#F3ECE4] font-medium bg-white">
                 {students.length > 0 ? (
                   students.map((s) => {
                     const isUnmasked = !!unmaskedRows[s.id];
@@ -525,39 +538,39 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
                           <div className="font-bold">{s.name}</div>
                           {s.email && <div className="text-[10px] font-mono text-slate-400">{s.email}</div>}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-600">
-                          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono font-bold text-[10px]">
+                        <td className="py-3.5 px-4 text-[#7A6A63]">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#F5EFE8] text-[#7A1A2C] border border-[#EADFD3] font-mono font-bold text-[10px]">
                             {s.department_code || 'IT'}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-slate-700 font-mono text-xs">
+                        <td className="py-3.5 px-4 text-[#2B1B1B] font-mono text-xs">
                           Year {s.class_year || '3'} • Sec {s.class_section || 'C'}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-700">{s.parent_name || 'N/A'}</td>
-                        <td className="py-3.5 px-4 font-mono text-slate-600">
+                        <td className="py-3.5 px-4 text-[#2B1B1B]">{s.parent_name || 'N/A'}</td>
+                        <td className="py-3.5 px-4 font-mono text-[#7A6A63]">
                           <div className="flex items-center gap-1.5">
                             <span>{displayedStudentPhone || 'Missing'}</span>
                             {isAdmin && (s.student_mobile || s.mobile_number) && (
                               <button
                                 onClick={() => toggleUnmask(s.id)}
                                 title={isUnmasked ? 'Mask' : 'Reveal student phone'}
-                                className="text-slate-400 hover:text-slate-700"
+                                className="text-[#7A6A63] hover:text-[#7A1A2C]"
                               >
-                                {isUnmasked ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                {isUnmasked ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3 text-[#C08A16]" />}
                               </button>
                             )}
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-slate-600">
+                        <td className="py-3.5 px-4 font-mono text-[#7A6A63]">
                           <div className="flex items-center gap-1.5">
-                            <span>{displayedParentPhone || 'Missing'}</span>
+                            <span className="font-bold text-[#2B1B1B]">{displayedParentPhone || 'Missing'}</span>
                             {isAdmin && (s.parent_mobile || s.parent_phone || s.mobile_number) && (
                               <button
                                 onClick={() => toggleUnmask(s.id)}
                                 title={isUnmasked ? 'Mask' : 'Reveal parent phone'}
-                                className="text-slate-400 hover:text-slate-700"
+                                className="text-[#7A6A63] hover:text-[#7A1A2C]"
                               >
-                                {isUnmasked ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                {isUnmasked ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3 text-[#C08A16]" />}
                               </button>
                             )}
                           </div>
@@ -567,16 +580,16 @@ export const Students: React.FC<StudentsProps> = ({ isAdmin }) => {
                             <button
                               onClick={() => handleOpenDetails(s)}
                               title="View Marks & Details"
-                              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition-all shadow-2xs active:scale-95"
+                              className="p-2 rounded-xl border border-[#EADFD3] hover:bg-[#FBF7F2] text-[#2B1B1B] transition-all shadow-2xs active:scale-95"
                             >
-                              <Eye className="w-3.5 h-3.5" />
+                              <Eye className="w-3.5 h-3.5 text-[#7A1A2C]" />
                             </button>
 
                             {isAdmin && (
                               <button
                                 onClick={() => handleDeleteStudent(s.id, s.name)}
                                 title="Delete Student"
-                                className="p-2 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-600 transition-all shadow-2xs active:scale-95"
+                                className="p-2 rounded-xl border border-red-200 hover:bg-red-50 text-[#C62828] transition-all shadow-2xs active:scale-95"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>

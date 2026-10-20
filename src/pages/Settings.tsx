@@ -141,71 +141,77 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <SettingsIcon className="w-5 h-5 text-indigo-600" />
-            <span>System Settings</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">Configure API credentials, notification behavior, and college details.</p>
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#EADFD3] shadow-xs flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="p-2.5 rounded-xl bg-maroon-50 text-maroon-700 border border-maroon-100">
+            <SettingsIcon className="w-5 h-5 text-maroon-700" />
+          </span>
+          <div>
+            <h2 className="text-xl font-bold font-serif text-[#2B1B1B] tracking-tight">System Configuration</h2>
+            <p className="text-xs text-[#7A6A63] mt-0.5">Configure API credentials, notification gateways, and institutional parameters.</p>
+          </div>
         </div>
         {saved && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold border border-indigo-200">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-200">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Changes Saved!
           </div>
         )}
       </div>
 
-      <div className="flex gap-6">
-        {/* Sidebar */}
-        <div className="w-44 shrink-0 space-y-1">
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Navigation Tabs */}
+        <div className="w-full md:w-52 shrink-0 space-y-1.5">
           {SETTINGS_SCHEMA.map(g => (
             <button
               key={g.group}
               onClick={() => setActiveGroup(g.group)}
-              className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+              className={`w-full text-left px-3.5 py-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all ${
                 activeGroup === g.group
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-maroon-700 text-white shadow-xs'
+                  : 'text-[#7A6A63] hover:bg-white hover:text-[#2B1B1B] border border-transparent hover:border-[#EADFD3]'
               }`}
             >
-              {g.icon}
-              {g.label.split(' (')[0]}
+              <span className={activeGroup === g.group ? 'text-white' : 'text-maroon-700'}>{g.icon}</span>
+              <span>{g.label.split(' (')[0]}</span>
             </button>
           ))}
         </div>
 
         {/* Main Panel */}
-        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="flex-1 bg-white rounded-2xl border border-[#EADFD3] shadow-xs p-6">
           {loading ? (
-            <div className="py-16 text-center"><div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div></div>
+            <div className="py-16 text-center"><div className="w-8 h-8 border-4 border-maroon-700 border-t-transparent rounded-full animate-spin mx-auto"></div></div>
           ) : (
             <>
-              <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
-                {currentGroup.icon}
-                {currentGroup.label}
-              </h3>
-              <div className="border-b border-slate-100 mb-5 pb-3">
+              <div className="flex items-center justify-between border-b border-[#EADFD3] pb-4 mb-5">
+                <div>
+                  <h3 className="text-base font-bold font-serif text-[#2B1B1B] flex items-center gap-2">
+                    <span className="text-maroon-700">{currentGroup.icon}</span>
+                    <span>{currentGroup.label}</span>
+                  </h3>
+                  <p className="text-xs text-[#7A6A63] mt-0.5">Manage operational settings for this component.</p>
+                </div>
+
                 {(activeGroup === 'whatsapp' || activeGroup === 'sms') && (
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => testConnection(activeGroup as 'whatsapp' | 'sms')}
                       disabled={testStatus[activeGroup] === 'testing'}
-                      className="flex items-center gap-1.5 text-xs text-blue-600 font-semibold hover:underline"
+                      className="px-3 py-1.5 rounded-lg border border-[#EADFD3] hover:bg-[#FBF7F2] text-xs text-maroon-700 font-semibold flex items-center gap-1.5 transition-colors"
                     >
                       {testStatus[activeGroup] === 'testing' ? (
-                        <><RefreshCw className="w-3 h-3 animate-spin" /> Testing…</>
+                        <><RefreshCw className="w-3 h-3 animate-spin text-maroon-700" /> Testing…</>
                       ) : (
-                        <><Wifi className="w-3 h-3" /> Test Connection</>
+                        <><Wifi className="w-3 h-3 text-maroon-700" /> Test Connection</>
                       )}
                     </button>
                     {testStatus[activeGroup] === 'ok' && (
-                      <span className="flex items-center gap-1 text-xs text-indigo-600 font-bold">
+                      <span className="flex items-center gap-1 text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
                         <CheckCircle2 className="w-3 h-3" /> Connected
                       </span>
                     )}
                     {testStatus[activeGroup] === 'fail' && (
-                      <span className="flex items-center gap-1 text-xs text-rose-600 font-bold">
+                      <span className="flex items-center gap-1 text-xs text-rose-700 font-bold bg-rose-50 px-2.5 py-1 rounded-md border border-rose-200">
                         <AlertCircle className="w-3 h-3" /> Failed
                       </span>
                     )}
@@ -216,20 +222,20 @@ export const Settings: React.FC = () => {
               <div className="space-y-4">
                 {currentGroup.fields.map(field => (
                   <div key={field.key}>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">{field.label}</label>
+                    <label className="text-xs font-semibold text-[#2B1B1B] block mb-1.5">{field.label}</label>
                     {field.type === 'boolean' ? (
-                      <label className="flex items-center gap-2 cursor-pointer">
+                      <label className="flex items-center gap-3 cursor-pointer">
                         <div
                           onClick={() => updateValue(field.key, values[field.key] === 'true' ? 'false' : 'true')}
-                          className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                            values[field.key] === 'true' ? 'bg-indigo-500' : 'bg-slate-300'
+                          className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                            values[field.key] === 'true' ? 'bg-maroon-700' : 'bg-[#EADFD3]'
                           }`}
                         >
-                          <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${
+                          <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${
                             values[field.key] === 'true' ? 'translate-x-5' : ''
                           }`} />
                         </div>
-                        <span className="text-xs text-slate-600">{values[field.key] === 'true' ? 'Enabled' : 'Disabled'}</span>
+                        <span className="text-xs font-medium text-[#2B1B1B]">{values[field.key] === 'true' ? 'Enabled' : 'Disabled'}</span>
                       </label>
                     ) : field.type === 'password' ? (
                       <div className="relative">
@@ -238,14 +244,14 @@ export const Settings: React.FC = () => {
                           value={values[field.key] || ''}
                           onChange={e => updateValue(field.key, e.target.value)}
                           placeholder={field.placeholder}
-                          className="w-full px-3 py-2 pr-9 rounded-lg border border-slate-300 text-xs font-mono"
+                          className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-[#EADFD3] text-xs font-mono bg-[#FBF7F2] text-[#2B1B1B] focus:ring-2 focus:ring-maroon-700/20 focus:border-maroon-700 transition-colors"
                         />
                         <button
                           type="button"
                           onClick={() => toggleReveal(field.key)}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A6A63] hover:text-[#2B1B1B]"
                         >
-                          {revealedKeys.has(field.key) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                          {revealedKeys.has(field.key) ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
                     ) : (
@@ -254,23 +260,23 @@ export const Settings: React.FC = () => {
                         value={values[field.key] || ''}
                         onChange={e => updateValue(field.key, e.target.value)}
                         placeholder={field.placeholder}
-                        className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#EADFD3] text-xs font-sans bg-[#FBF7F2] text-[#2B1B1B] focus:ring-2 focus:ring-maroon-700/20 focus:border-maroon-700 transition-colors"
                       />
                     )}
-                    {field.help && <p className="text-[11px] text-slate-400 mt-1">{field.help}</p>}
+                    {field.help && <p className="text-[11px] text-[#7A6A63] mt-1.5">{field.help}</p>}
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 flex justify-between items-center border-t border-slate-100 pt-4">
-                <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                  <Shield className="w-3 h-3" />
-                  <span>Credentials are stored server-side and never exposed to the browser.</span>
+              <div className="mt-8 flex justify-between items-center border-t border-[#EADFD3] pt-4">
+                <div className="flex items-center gap-1.5 text-[11px] text-[#7A6A63]">
+                  <Shield className="w-3.5 h-3.5 text-maroon-700" />
+                  <span>Credentials are encrypted server-side and never exposed to the client.</span>
                 </div>
                 <button
                   onClick={() => saveGroup(activeGroup)}
                   disabled={saving}
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-maroon-700 hover:bg-maroon-800 active:bg-maroon-900 text-white text-xs font-semibold shadow-xs flex items-center gap-2 disabled:opacity-50 border border-maroon-900/20 transition-colors"
                 >
                   {saving ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Saving…</> : <><Save className="w-3.5 h-3.5" /> Save Changes</>}
                 </button>

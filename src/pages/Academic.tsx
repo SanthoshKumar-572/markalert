@@ -319,49 +319,53 @@ export const Academic: React.FC<AcademicProps> = ({ isAdmin, onNavigate }) => {
     <div className="space-y-6">
       {/* Status banner */}
       {statusMessage && (
-        <div className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
+        <div className={`p-4 rounded-xl text-xs font-semibold flex items-center justify-between transition-all border ${
           statusMessage.type === 'success'
-            ? 'bg-indigo-50 text-indigo-800 border border-indigo-200'
-            : 'bg-rose-50 text-rose-800 border border-rose-200'
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+            : 'bg-rose-50 text-rose-800 border-rose-200'
         }`}>
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
             <span>{statusMessage.text}</span>
           </div>
-          <button onClick={() => setStatusMessage(null)} className="text-slate-400 hover:text-slate-700">✕</button>
+          <button onClick={() => setStatusMessage(null)} className="text-[#7A6A63] hover:text-[#2B1B1B]">✕</button>
         </div>
       )}
 
       {/* Header */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-indigo-600" />
-            <span>{isAdmin ? 'Academic Administration & Assignments' : 'My Academic Classes'}</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {isAdmin
-              ? 'Configure faculty accounts, create class sections, assign teachers to classes, and manage subjects/exams.'
-              : 'View authorized class assignments and enrolled student counts.'}
-          </p>
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#EADFD3] shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="p-2.5 rounded-xl bg-maroon-50 text-maroon-700 border border-maroon-100">
+            <BookOpen className="w-5 h-5 text-maroon-700" />
+          </span>
+          <div>
+            <h2 className="text-xl font-bold font-serif text-[#2B1B1B] tracking-tight">
+              {isAdmin ? 'Faculty Management & Academic Structure' : 'My Academic Classes'}
+            </h2>
+            <p className="text-xs text-[#7A6A63] mt-0.5">
+              {isAdmin
+                ? 'Configure faculty accounts, create class sections, assign teachers to classes, and manage subjects/exams.'
+                : 'View authorized class assignments and enrolled student counts.'}
+            </p>
+          </div>
         </div>
 
         {/* Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-[#FBF7F2] border border-[#EADFD3] rounded-xl overflow-x-auto">
           {isAdmin && (
             <>
               <button
                 onClick={() => setActiveTab('faculty')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-                  activeTab === 'faculty' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+                  activeTab === 'faculty' ? 'bg-maroon-700 text-white shadow-xs' : 'text-[#7A6A63] hover:text-[#2B1B1B]'
                 }`}
               >
                 Faculty ({facultyList.length})
               </button>
               <button
                 onClick={() => setActiveTab('assignments')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-                  activeTab === 'assignments' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+                  activeTab === 'assignments' ? 'bg-maroon-700 text-white shadow-xs' : 'text-[#7A6A63] hover:text-[#2B1B1B]'
                 }`}
               >
                 Faculty-Class Assignments ({assignments.length})
@@ -370,8 +374,8 @@ export const Academic: React.FC<AcademicProps> = ({ isAdmin, onNavigate }) => {
           )}
           <button
             onClick={() => setActiveTab('classes')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-              activeTab === 'classes' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+              activeTab === 'classes' ? 'bg-maroon-700 text-white shadow-xs' : 'text-[#7A6A63] hover:text-[#2B1B1B]'
             }`}
           >
             Classes ({classes.length})
@@ -379,8 +383,8 @@ export const Academic: React.FC<AcademicProps> = ({ isAdmin, onNavigate }) => {
           {isAdmin && (
             <button
               onClick={() => setActiveTab('departments')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-                activeTab === 'departments' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+                activeTab === 'departments' ? 'bg-maroon-700 text-white shadow-xs' : 'text-[#7A6A63] hover:text-[#2B1B1B]'
               }`}
             >
               Departments ({departments.length})
@@ -388,16 +392,16 @@ export const Academic: React.FC<AcademicProps> = ({ isAdmin, onNavigate }) => {
           )}
           <button
             onClick={() => setActiveTab('subjects')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-              activeTab === 'subjects' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+              activeTab === 'subjects' ? 'bg-maroon-700 text-white shadow-xs' : 'text-[#7A6A63] hover:text-[#2B1B1B]'
             }`}
           >
             Subjects ({subjects.length})
           </button>
           <button
             onClick={() => setActiveTab('exams')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-              activeTab === 'exams' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+              activeTab === 'exams' ? 'bg-maroon-700 text-white shadow-xs' : 'text-[#7A6A63] hover:text-[#2B1B1B]'
             }`}
           >
             Exams ({exams.length})
@@ -408,16 +412,16 @@ export const Academic: React.FC<AcademicProps> = ({ isAdmin, onNavigate }) => {
       {/* Tab: Faculty & Staff */}
       {activeTab === 'faculty' && isAdmin && (
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="bg-white p-4 rounded-2xl border border-[#EADFD3] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5 text-xs text-slate-600 font-semibold">
-                <Filter className="w-4 h-4 text-indigo-600" />
-                <span>Filter by Department:</span>
+              <div className="flex items-center gap-1.5 text-xs text-[#7A6A63] font-semibold">
+                <Filter className="w-4 h-4 text-maroon-700" />
+                <span className="text-[#2B1B1B]">Filter by Department:</span>
               </div>
               <select
                 value={facultyDeptFilter}
                 onChange={e => setFacultyDeptFilter(e.target.value)}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs font-medium bg-slate-50 focus:bg-white"
+                className="px-3.5 py-2 rounded-xl border border-[#EADFD3] text-xs font-medium bg-[#FBF7F2] text-[#2B1B1B] focus:ring-2 focus:ring-maroon-700/20 focus:border-maroon-700 transition-colors"
               >
                 <option value="ALL">All Departments</option>
                 {departments.map(d => (
@@ -438,7 +442,7 @@ export const Academic: React.FC<AcademicProps> = ({ isAdmin, onNavigate }) => {
                 });
                 setShowFacultyModal(true);
               }}
-              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 self-start sm:self-auto"
+              className="px-4 py-2 bg-maroon-700 hover:bg-maroon-800 active:bg-maroon-900 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-2 self-start sm:self-auto transition-colors border border-maroon-900/20"
             >
               <Plus className="w-4 h-4" />
               <span>Add Faculty Member</span>

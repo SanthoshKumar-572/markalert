@@ -75,108 +75,110 @@ export const Parents: React.FC<ParentsProps> = ({ isAdmin }) => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <HeartHandshake className="w-5 h-5 text-indigo-600" />
-            <span>Parent Contact & Notification Registry</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Registered parent phone numbers and notification channel preferences (WhatsApp & SMS).
-          </p>
+      <div className="bg-white p-5 sm:p-6 rounded-2xl border border-[#EADFD3] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="p-2.5 rounded-xl bg-maroon-50 text-maroon-700 border border-maroon-100">
+            <HeartHandshake className="w-5 h-5 text-maroon-700" />
+          </span>
+          <div>
+            <h2 className="text-xl font-bold font-serif text-[#2B1B1B] tracking-tight">Parent Contact & Notification Registry</h2>
+            <p className="text-xs text-[#7A6A63] mt-0.5">
+              Registered parent phone numbers and notification channel preferences (WhatsApp & SMS).
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#7A6A63] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search parent or student..."
-              className="w-56 pl-8 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 bg-white"
+              className="w-64 pl-8 pr-3 py-2 rounded-xl border border-[#EADFD3] text-xs font-sans bg-[#FBF7F2] text-[#2B1B1B] placeholder-[#7A6A63]/60 focus:ring-2 focus:ring-maroon-700/20 focus:border-maroon-700 transition-colors"
             />
           </div>
-          <button type="submit" className="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800">
+          <button type="submit" className="px-4 py-2 rounded-xl bg-maroon-700 text-white text-xs font-semibold hover:bg-maroon-800 transition-colors shadow-xs">
             Search
           </button>
         </form>
       </div>
 
       {/* Parents Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#EADFD3] shadow-xs overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center min-h-[300px]">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-4 border-maroon-700 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+              <thead className="bg-[#FBF7F2] border-b border-[#EADFD3] text-[#7A6A63] font-semibold">
                 <tr>
-                  <th className="py-3 px-4">Student</th>
-                  <th className="py-3 px-4">Parent / Guardian</th>
-                  <th className="py-3 px-4">Mobile Number</th>
-                  <th className="py-3 px-4">WhatsApp Channel</th>
-                  <th className="py-3 px-4">SMS Channel</th>
-                  {isAdmin && <th className="py-3 px-4 text-right">Actions</th>}
+                  <th className="py-3.5 px-4">Student</th>
+                  <th className="py-3.5 px-4">Parent / Guardian</th>
+                  <th className="py-3.5 px-4">Mobile Number</th>
+                  <th className="py-3.5 px-4">WhatsApp Channel</th>
+                  <th className="py-3.5 px-4">SMS Channel</th>
+                  {isAdmin && <th className="py-3.5 px-4 text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
+              <tbody className="divide-y divide-[#EADFD3]/60 font-medium">
                 {parents.length > 0 ? (
                   parents.map((p) => {
                     const isUnmasked = !!unmaskedRows[p.id];
                     const displayed = isUnmasked ? p.mobile_number : p.mobile_number_masked;
 
                     return (
-                      <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="font-bold text-slate-900">{p.student_name}</div>
-                          <div className="text-[11px] font-mono text-slate-400">{p.register_number}</div>
+                      <tr key={p.id} className="hover:bg-[#FBF7F2]/60 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-[#2B1B1B]">{p.student_name}</div>
+                          <div className="text-[11px] font-mono text-[#7A6A63]">{p.register_number}</div>
                         </td>
 
-                        <td className="py-3 px-4 text-slate-800">{p.parent_name}</td>
+                        <td className="py-3.5 px-4 text-[#2B1B1B] font-medium">{p.parent_name}</td>
 
-                        <td className="py-3 px-4 font-mono text-slate-600">
+                        <td className="py-3.5 px-4 font-mono text-[#2B1B1B]">
                           <div className="flex items-center gap-1.5">
                             <span>{displayed}</span>
                             {isAdmin && (
                               <button
                                 onClick={() => toggleUnmask(p.id)}
                                 title={isUnmasked ? 'Mask' : 'Reveal phone'}
-                                className="text-slate-400 hover:text-slate-700"
+                                className="text-[#7A6A63] hover:text-[#2B1B1B]"
                               >
-                                {isUnmasked ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                {isUnmasked ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                               </button>
                             )}
                           </div>
                         </td>
 
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            p.whatsapp_enabled ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-500'
+                        <td className="py-3.5 px-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            p.whatsapp_enabled ? 'bg-[#25D366]/15 text-emerald-800 border border-[#25D366]/30' : 'bg-[#FBF7F2] text-[#7A6A63] border border-[#EADFD3]'
                           }`}>
-                            <MessageSquare className="w-3 h-3" />
+                            <MessageSquare className="w-3 h-3 text-[#25D366]" />
                             <span>{p.whatsapp_enabled ? 'Active' : 'Disabled'}</span>
                           </span>
                         </td>
 
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            p.sms_enabled ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-500'
+                        <td className="py-3.5 px-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            p.sms_enabled ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-[#FBF7F2] text-[#7A6A63] border border-[#EADFD3]'
                           }`}>
-                            <Smartphone className="w-3 h-3" />
+                            <Smartphone className="w-3 h-3 text-amber-700" />
                             <span>{p.sms_enabled ? 'Active' : 'Disabled'}</span>
                           </span>
                         </td>
 
                         {isAdmin && (
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-3.5 px-4 text-right">
                             <button
                               onClick={() => setSelectedParent(p)}
-                              className="px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold inline-flex items-center gap-1"
+                              className="px-3 py-1.5 rounded-xl border border-[#EADFD3] hover:bg-[#FBF7F2] text-[#2B1B1B] text-xs font-semibold inline-flex items-center gap-1.5 transition-colors hover:border-maroon-700/40"
                             >
-                              <Edit2 className="w-3 h-3" />
+                              <Edit2 className="w-3 h-3 text-maroon-700" />
                               <span>Edit</span>
                             </button>
                           </td>
@@ -186,7 +188,7 @@ export const Parents: React.FC<ParentsProps> = ({ isAdmin }) => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400 text-xs">
+                    <td colSpan={6} className="py-12 text-center text-[#7A6A63] text-xs">
                       No parent records found.
                     </td>
                   </tr>

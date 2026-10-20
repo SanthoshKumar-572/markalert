@@ -35,8 +35,36 @@ export interface NotificationTemplate {
 
 const BUILTIN_TEMPLATES: NotificationTemplate[] = [
   {
+    id: 'ia2_vsb_marks',
+    name: '1. VSB Internal Assessment – II Marks (Official Template)',
+    description: 'VSB College IA-II template with Register No, Department, Class, Subject 1-6 marks & results, Overall Result',
+    bodyWhatsApp: `VSB ENGINEERING COLLEGE
+
+Dear Parent of {student_name},
+
+Internal Assessment – II Marks
+
+Register No.: {register_number}
+Department: {department}
+Class: {class_name}
+
+Subject-wise Marks (Out of 100):
+• {subject1_name}: {subject1_marks}/100 – {subject1_result}
+• {subject2_name}: {subject2_marks}/100 – {subject2_result}
+• {subject3_name}: {subject3_marks}/100 – {subject3_result}
+• {subject4_name}: {subject4_marks}/100 – {subject4_result}
+• {subject5_name}: {subject5_marks}/100 – {subject5_result}
+• {subject6_name}: {subject6_marks}/100 – {subject6_result}
+
+Overall Result: {overall_result}
+
+Regards,
+VSB Engineering College`,
+    bodySMS: `VSB ENGINEERING COLLEGE: Dear Parent of {student_name}, Register No: {register_number}, Dept: {department}, Class: {class_name}. IA-II Marks: {subject1_name}: {subject1_marks} ({subject1_result}), {subject2_name}: {subject2_marks} ({subject2_result}), {subject3_name}: {subject3_marks} ({subject3_result}), {subject4_name}: {subject4_marks} ({subject4_result}), {subject5_name}: {subject5_marks} ({subject5_result}), {subject6_name}: {subject6_marks} ({subject6_result}). Overall Result: {overall_result}. Regards, VSB Engineering College`
+  },
+  {
     id: 'marks_report',
-    name: '1. Internal Marks Report (Each Subject Breakdown)',
+    name: '2. Internal Marks Report (Each Subject Breakdown)',
     description: 'Dear {parent_name}, {exam_name} marks of your ward, Student, Register No, Subject list, Total & Percentage',
     bodyWhatsApp: `Dear {parent_name},
 
@@ -56,7 +84,7 @@ Regards,
   },
   {
     id: 'holiday_notice',
-    name: '2. General Notice / Holiday & Circular Announcement',
+    name: '3. General Notice / Holiday & Circular Announcement',
     description: 'Direct communication for holidays, college reopenings, parent meetings & general notices',
     bodyWhatsApp: `Dear {parent_name},
 
@@ -110,11 +138,11 @@ export const SendNotifications: React.FC<SendNotificationsProps> = ({
     pushName?: string;
   }>({ status: 'DISCONNECTED' });
 
-  // Template State (Must be selected by user after mapping before sending)
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  // Template State (Defaults to VSB Engineering College IA-II template)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('ia2_vsb_marks');
   const [isEditingTemplate, setIsEditingTemplate] = useState(false);
-  const [currentWhatsAppTemplate, setCurrentWhatsAppTemplate] = useState<string>('');
-  const [currentSMSTemplate, setCurrentSMSTemplate] = useState<string>('');
+  const [currentWhatsAppTemplate, setCurrentWhatsAppTemplate] = useState<string>(BUILTIN_TEMPLATES[0].bodyWhatsApp);
+  const [currentSMSTemplate, setCurrentSMSTemplate] = useState<string>(BUILTIN_TEMPLATES[0].bodySMS);
   const [templateSavedFeedback, setTemplateSavedFeedback] = useState<string | null>(null);
 
   // Preview State
@@ -255,11 +283,24 @@ export const SendNotifications: React.FC<SendNotificationsProps> = ({
 
   const renderCustomMessage = (templateStr: string, item: MessagePreviewItem) => {
     let marksText = '';
+    const subjectList: Array<{ name: string; marks: number | string; maxMarks: number | string; result: string }> = [];
+
     if (item.marks) {
       if (Array.isArray(item.marks)) {
         marksText = item.marks.map((m: any) => `• ${m.subjectCode || m.subjectName || m.subject}: ${m.marksObtained ?? m.marks}/${m.maximumMarks ?? m.maxMarks ?? 100}`).join('\n');
+        item.marks.forEach((m: any) => {
+          const sName = m.subjectCode || m.subjectName || m.subject || '';
+          const sMarks = m.marksObtained ?? m.marks ?? 0;
+          const sMax = m.maximumMarks ?? m.maxMarks ?? 100;
+          const sRes = Number(sMarks) >= 50 ? 'Pass' : 'Fail';
+          subjectList.push({ name: sName, marks: sMarks, maxMarks: sMax, result: sRes });
+        });
       } else if (typeof item.marks === 'object') {
         marksText = Object.entries(item.marks).map(([k, v]) => `• ${k}: ${v}/100`).join('\n');
+        Object.entries(item.marks).forEach(([k, v]) => {
+          const sRes = Number(v) >= 50 ? 'Pass' : 'Fail';
+          subjectList.push({ name: k, marks: v as any, maxMarks: 100, result: sRes });
+        });
       } else {
         marksText = String(item.marks);
       }
@@ -271,39 +312,81 @@ export const SendNotifications: React.FC<SendNotificationsProps> = ({
       }
     }
 
+    if (subjectList.length === 0 && item.renderedWhatsApp) {
+      const bulletMatches = item.renderedWhatsApp.match(/•\s*([^:\n]+):\s*(\d+)(?:\/\d+)?(?:\s*–\s*([^\n]+))?/g);
+      if (bulletMatches) {
+        bulletMatches.forEach(b => {
+          const m = b.match(/•\s*([^:\n]+):\s*(\d+)(?:\/\d+)?(?:\s*–\s*([^\n]+))?/);
+          if (m) {
+            const sName = m[1].trim();
+            const sMarks = Number(m[2]);
+            const sRes = m[3] ? m[3].trim() : (sMarks >= 50 ? 'Pass' : 'Fail');
+            subjectList.push({ name: sName, marks: sMarks, maxMarks: 100, result: sRes });
+          }
+        });
+      }
+    }
+
     if (!marksText) {
       marksText = '• Internal Assessment Score Recorded';
     }
 
     const currentExam = exams.find(e => e.id === selectedExamId);
-    const examName = currentExam?.exam_name || 'Internal Examination';
+    const examName = currentExam?.exam_name || 'Internal Assessment – II';
 
     const parentName = item.parentName || (item.studentName ? `${item.studentName}'s Parent` : 'Parent');
     const totalVal = Number(item.totalMarks ?? 0);
-    const maxVal = Number(item.maxMarks ?? 600);
+    const maxVal = Number(item.maxMarks ?? (subjectList.length > 0 ? subjectList.length * 100 : 600));
     const pct = item.percentage != null && !isNaN(Number(item.percentage)) && Number(item.percentage) > 0
       ? Number(item.percentage).toFixed(2)
       : (maxVal > 0 ? ((totalVal / maxVal) * 100).toFixed(2) : '0.00');
+
+    const hasAnySubjectFail = subjectList.length > 0 && subjectList.some(s => Number(s.marks) < 50);
+    const overallRes = String((item as any).overallResult || (item as any).overall_result || item.result || (hasAnySubjectFail ? 'FAIL' : (Number(pct) >= 50 ? 'PASS' : 'FAIL')));
+    const dept = (item as any).department || 'Information Technology';
+    const cls = (item as any).className || (item as any).class_name || item.classSection || 'IT-C';
+
+    const subjectVars: Record<string, string> = {};
+    for (let i = 0; i < 6; i++) {
+      const num = i + 1;
+      const sub = subjectList[i];
+      if (sub) {
+        subjectVars[`subject${num}_name`] = sub.name;
+        subjectVars[`subject${num}_marks`] = String(sub.marks);
+        subjectVars[`subject${num}_result`] = sub.result;
+      } else {
+        subjectVars[`subject${num}_name`] = '';
+        subjectVars[`subject${num}_marks`] = '';
+        subjectVars[`subject${num}_result`] = '';
+      }
+    }
 
     const vars: Record<string, string> = {
       parent_name: parentName,
       student_name: item.studentName || '',
       register_number: item.registerNumber || '',
-      class_section: item.classSection || 'Information Technology - Year 3, Section C',
+      department: dept,
+      class_name: cls,
+      class_section: item.classSection || `${dept} - ${cls}`,
       exam_name: examName,
       marks: marksText,
       total: String(item.totalMarks ?? totalVal),
       maximum_marks: String(item.maxMarks ?? maxVal),
       percentage: pct,
-      result: String(item.result || (Number(pct) >= 50 ? 'PASS' : 'FAIL')),
+      result: overallRes,
+      overall_result: overallRes,
       college_name: collegeName || 'VSB ENGINEERING COLLEGE',
-      notice_message: 'The college will remain closed tomorrow on account of Government Holiday. Regular academic sessions will resume on Monday.'
+      notice_message: 'The college will remain closed tomorrow on account of Government Holiday. Regular academic sessions will resume on Monday.',
+      ...subjectVars
     };
 
     let rendered = templateStr;
     Object.entries(vars).forEach(([key, val]) => {
       rendered = rendered.replace(new RegExp(`\\{${key}\\}`, 'g'), val);
     });
+    // Clean up empty bullet lines for missing subjects
+    rendered = rendered.replace(/^•\s*:\s*\/100\s*–\s*.*$\n?/gm, '');
+    rendered = rendered.replace(/^•\s*\{subject\d+_[^}]+\}:.*$\n?/gm, '');
     return rendered;
   };
 
@@ -388,9 +471,7 @@ export const SendNotifications: React.FC<SendNotificationsProps> = ({
             </div>
             <span>Marks Notification Dispatcher</span>
           </h2>
-          <p className="text-xs text-slate-500 font-sans">
-            Select channels, preview personalized parent messages, check for duplicate protection, and dispatch safely.
-          </p>
+         
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -837,8 +918,8 @@ export const SendNotifications: React.FC<SendNotificationsProps> = ({
               )}
             </div>
 
-            {/* Template Selector Pills (Exactly 2 Official Templates) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Template Selector Pills (Official Templates) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               {BUILTIN_TEMPLATES.map((tmpl) => {
                 const isSelected = selectedTemplateId === tmpl.id;
                 return (
@@ -894,13 +975,16 @@ export const SendNotifications: React.FC<SendNotificationsProps> = ({
                     {[
                       { key: 'student_name', label: '{student_name}' },
                       { key: 'register_number', label: '{register_number}' },
-                      { key: 'class_section', label: '{class_section}' },
-                      { key: 'exam_name', label: '{exam_name}' },
+                      { key: 'department', label: '{department}' },
+                      { key: 'class_name', label: '{class_name}' },
+                      { key: 'overall_result', label: '{overall_result}' },
+                      { key: 'subject1_name', label: '{subject1_name}' },
+                      { key: 'subject1_marks', label: '{subject1_marks}' },
+                      { key: 'subject1_result', label: '{subject1_result}' },
                       { key: 'marks', label: '{marks}' },
                       { key: 'total', label: '{total}' },
                       { key: 'maximum_marks', label: '{maximum_marks}' },
-                      { key: 'result', label: '{result}' },
-                      { key: 'notice_message', label: '{notice_message}' },
+                      { key: 'percentage', label: '{percentage}' },
                       { key: 'college_name', label: '{college_name}' }
                     ].map(v => (
                       <button

@@ -14,7 +14,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onLoginS
   const [percent, setPercent] = useState(0);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [role, setRole] = useState<'faculty' | 'admin'>('faculty');
   const [email, setEmail] = useState('faculty@college.edu');
   const [password, setPassword] = useState('Faculty@123');
   const [showPass, setShowPass] = useState(false);
@@ -78,19 +77,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onLoginS
     window.addEventListener('pointermove', handlePointerMove);
     return () => window.removeEventListener('pointermove', handlePointerMove);
   }, []);
-
-  // Handle role tab switch
-  const handleSelectRole = (r: 'faculty' | 'admin') => {
-    setRole(r);
-    setMsg(null);
-    if (r === 'admin') {
-      setEmail('admin@college.edu');
-      setPassword('Admin@123');
-    } else {
-      setEmail('faculty@college.edu');
-      setPassword('Faculty@123');
-    }
-  };
 
   // Trigger Entrance Transition to Login or Dashboard
   const handleGetStarted = () => {
@@ -586,38 +572,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onLoginS
           font-weight: 500;
         }
 
-        .vsb-login-tabs {
-          display: flex;
-          gap: 6px;
-          padding: 4px;
-          margin-bottom: 16px;
-          border-radius: 999px;
-          background: rgba(255,255,255,.08);
-        }
-
-        .vsb-login-tabs button {
-          flex: 1;
-          margin: 0;
-          padding: 8px 0;
-          font-family: 'Manrope', sans-serif;
-          font-weight: 600;
-          font-size: 13px;
-          letter-spacing: 0.02em;
-          color: #fff;
-          background: none;
-          opacity: 1;
-          animation: none;
-          border-radius: 999px;
-          border: none;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .vsb-login-tabs button.on {
-          color: #3a1a00;
-          background: var(--foil);
-          font-weight: 700;
-        }
 
         .vsb-fld {
           display: block;
@@ -998,29 +952,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, onLoginS
           <h2>CollegeMarks Portal</h2>
           <p className="cn">V.S.B. Engineering College, Karur</p>
 
-          {/* Role selection tabs */}
-          <div className="vsb-login-tabs">
-            <button
-              type="button"
-              className={role === 'faculty' ? 'on' : ''}
-              id="tabFaculty"
-              onClick={() => handleSelectRole('faculty')}
-            >
-              Faculty
-            </button>
-            <button
-              type="button"
-              className={role === 'admin' ? 'on' : ''}
-              id="tabAdmin"
-              onClick={() => handleSelectRole('admin')}
-            >
-              Admin
-            </button>
-          </div>
-
           <form onSubmit={handleLoginSubmit} autoComplete="on">
             <label className="vsb-fld">
-              <span>{role === 'admin' ? 'Admin Institutional Email' : 'Faculty Institutional Email'}</span>
+              <span>Institutional Email</span>
               <div>
                 <input
                   type="email"

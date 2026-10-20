@@ -184,6 +184,9 @@ export interface MessagePreviewItem {
   maxMarks: number;
   percentage: number;
   result?: 'PASS' | 'FAIL';
+  overallResult?: string;
+  department?: string;
+  className?: string;
   marks?: any;
   classSection?: string;
 }
@@ -231,6 +234,7 @@ export interface MessageTemplate {
   name: string;
   channel: string;
   template_text: string;
+  body?: string;
   is_active: boolean;
 }
 
@@ -254,6 +258,7 @@ export interface DashboardStats {
   studentsCount: number;
   examsCount?: number;
   marksCount?: number;
+  pendingCount?: number;
   notificationsSent: number;
   deliveredCount: number;
   failedCount: number;

@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
-import { UploadMarks } from './pages/UploadMarks';
-import { SendNotifications } from './pages/SendNotifications';
+import { NotifyWizard } from './pages/NotifyWizard';
 import { NotificationHistory } from './pages/NotificationHistory';
 import { Students } from './pages/Students';
 import { Parents } from './pages/Parents';
@@ -20,6 +19,7 @@ export type PageId =
   | 'dashboard'
   | 'upload'
   | 'send'
+  | 'notify-wizard'
   | 'whatsapp-device'
   | 'notifications'
   | 'students'
@@ -36,11 +36,17 @@ interface SendData {
   uploadId?: string;
 }
 
+interface UploadPreset {
+  deptId?: string;
+  classId?: string;
+}
+
 export const getPageTitle = (page: string, isAdmin?: boolean): string => {
   const map: Record<string, string> = {
     dashboard: 'Dashboard',
-    upload: 'Upload Internal Marks',
-    send: 'Send Notifications',
+    upload: 'Marks Notification Wizard',
+    send: 'Marks Notification Wizard',
+    'notify-wizard': 'Marks Notification Wizard',
     'whatsapp-device': 'Faculty WhatsApp Session',
     notifications: 'Notification History',
     students: 'Students & Class Master',
@@ -59,6 +65,7 @@ function App() {
   const [activePage, setActivePage] = useState<PageId>('dashboard');
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [sendData, setSendData] = useState<SendData | null>(null);
+  const [uploadPreset, setUploadPreset] = useState<UploadPreset | null>(null);
 
   // Navigation History Stack for Backward / Forward navigation
   const [historyStack, setHistoryStack] = useState<PageId[]>(['dashboard']);
@@ -173,7 +180,7 @@ function App() {
     fileName: string,
     uploadId: string
   ) => {
-    navigateTo('send', { examId, rows, fileName, uploadId });
+    navigateTo('notify-wizard', { examId, rows, fileName, uploadId });
   };
 
   if (showSplash) {
@@ -212,26 +219,33 @@ function App() {
       case 'dashboard':
         return <Dashboard onNavigate={(page) => navigateTo(page as PageId)} user={user} />;
       case 'upload':
-        return <UploadMarks onProceedToSend={handleProceedToSend} />;
       case 'send':
+      case 'notify-wizard': {
+        const presetKey = uploadPreset ? `${uploadPreset.deptId}-${uploadPreset.classId}` : 'default';
         return (
-          <SendNotifications
-            initialExamId={sendData?.examId}
-            initialRows={sendData?.rows}
-            initialFileName={sendData?.fileName}
-            initialUploadId={sendData?.uploadId}
-            onNavigateBack={() => navigateTo('upload')}
-            onNavigateToDashboard={() => navigateTo('dashboard')}
+          <NotifyWizard
+            key={presetKey}
+            initialDeptId={uploadPreset?.deptId}
+            initialClassId={uploadPreset?.classId}
             onNavigateToHistory={() => navigateTo('notifications')}
-            onNavigateToWhatsAppDevice={() => navigateTo('whatsapp-device')}
+            onNavigateToDashboard={() => navigateTo('dashboard')}
           />
         );
+      }
       case 'whatsapp-device':
         return <WhatsAppDevice user={user} />;
       case 'notifications':
         return <NotificationHistory />;
       case 'students':
-        return <Students isAdmin={isAdmin} />;
+        return (
+          <Students
+            isAdmin={isAdmin}
+            onNavigateToUpload={(deptId, classId) => {
+              setUploadPreset({ deptId, classId });
+              navigateTo('upload');
+            }}
+          />
+        );
       case 'parents':
         return <Parents isAdmin={isAdmin} />;
       case 'academic':

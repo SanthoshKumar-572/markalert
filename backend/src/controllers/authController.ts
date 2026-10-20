@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { db } from '../database/db';
-import { generateToken, logAudit } from '../middleware/auth';
+import { generateToken, logAudit, AuthUser } from '../middleware/auth';
 
 export async function login(req: Request, res: Response): Promise<void> {
   try {
@@ -23,11 +23,11 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const tokenUser = {
+    const tokenUser: AuthUser = {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role,
+      role: user.role === 'ADMIN' ? 'ADMIN' : 'FACULTY',
       department_id: user.department_id
     };
 
@@ -82,7 +82,7 @@ export async function register(req: Request, res: Response): Promise<void> {
       // Ignore if assignment table schema differs
     }
 
-    const tokenUser = {
+    const tokenUser: AuthUser = {
       id: userId,
       name: name.trim(),
       email: cleanEmail,

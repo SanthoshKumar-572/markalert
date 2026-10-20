@@ -18,6 +18,8 @@ import whatsappSessionRoutes from './routes/whatsappSessionRoutes';
 
 dotenv.config();
 
+// CollegeSMS server instance
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 

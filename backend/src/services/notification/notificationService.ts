@@ -49,6 +49,9 @@ export class NotificationService {
       const bRegex = new RegExp(`\\[${bKey}\\]`, 'gi');
       result = result.replace(bRegex, String(bVal));
     }
+    // Clean up empty bullet lines for subjects that were not provided
+    result = result.replace(/^•\s*:\s*\/100\s*–\s*.*$\n?/gm, '');
+    result = result.replace(/^•\s*\{subject\d+_[^}]+\}:.*$\n?/gm, '');
     return result;
   }
 
@@ -73,36 +76,31 @@ export class NotificationService {
     duplicateCount: number;
   }> {
     const exam = await db.queryOne<any>('SELECT * FROM exams WHERE id = ?', [examId]);
-    const examName = exam ? exam.exam_name : 'Internal Assessment';
+    const examName = exam ? exam.exam_name : 'Internal Assessment – II';
 
     const collegeSetting = await db.queryOne<any>('SELECT value FROM system_settings WHERE key = ?', ['COLLEGE_NAME']);
     const collegeName = collegeSetting ? collegeSetting.value : 'VSB ENGINEERING COLLEGE';
 
-    const waTemplateRow = await db.queryOne<any>("SELECT COALESCE(body, template_text) as template_body FROM message_templates WHERE channel = 'WHATSAPP' AND is_active = 1 LIMIT 1");
-    const smsTemplateRow = await db.queryOne<any>("SELECT COALESCE(body, template_text) as template_body FROM message_templates WHERE channel = 'SMS' AND is_active = 1 LIMIT 1");
+    const waTemplateRow = await db.queryOne<any>("SELECT COALESCE(body, template_text) as template_body FROM message_templates WHERE channel = 'WHATSAPP' AND is_active = 1 ORDER BY (CASE WHEN id = 'tpl-ia2-whatsapp' THEN 0 ELSE 1 END), id ASC LIMIT 1");
+    const smsTemplateRow = await db.queryOne<any>("SELECT COALESCE(body, template_text) as template_body FROM message_templates WHERE channel = 'SMS' AND is_active = 1 ORDER BY (CASE WHEN id = 'tpl-ia2-sms' THEN 0 ELSE 1 END), id ASC LIMIT 1");
 
-    const defaultWATemplate = `Dear Parent/Guardian,
+    const defaultWATemplate = `VSB ENGINEERING COLLEGE, KARUR
 
-Greetings from {{college_name}}.
+Dear Parent of {student_name},
 
-This is to inform you about the Internal Examination marks of your ward:
+Internal Assessment – II Marks
 
-Student Name: {{student_name}}
-Register Number: {{register_number}}
-Class/Section: {{class_section}}
+Register No.: {register_number}
+Class: {class_name} | Department: {department}
 
-📚 Internal Examination Marks:
+{marks}
 
-{{marks}}
+Overall Result: {overall_result}
 
-Total: {{total}}/{{maximum_marks}}
-Result: {{result}}
 Regards,
-VENGAIMARBAN
-INFORMATION TECHNOLOGY
-VSB ENGINEERING COLLEGE`;
+VSB Engineering College, Karur.`;
 
-    const defaultSMSTemplate = `Dear Parent/Guardian, Greetings from {{college_name}}. Internal marks for {{student_name}} ({{register_number}}, {{class_section}}): Total: {{total}}/{{maximum_marks}}. Result: {{result}}. Marks:\n{{marks}}.\nRegards, VENGAIMARBAN, IT Dept, {{college_name}}`;
+    const defaultSMSTemplate = `VSB ENGINEERING COLLEGE, KARUR: Dear Parent of {student_name}, Register No: {register_number}, Class: {class_name}, Dept: {department}. IA-II Marks: {marks}. Overall Result: {overall_result}. Regards, VSB Engineering College, Karur.`;
 
     const waTemplate = waTemplateRow?.template_body || defaultWATemplate;
     const smsTemplate = smsTemplateRow?.template_body || defaultSMSTemplate;
@@ -156,8 +154,11 @@ VSB ENGINEERING COLLEGE`;
     if (recordsToProcess && recordsToProcess.length > 0) {
       for (const rec of recordsToProcess) {
         let student = await db.queryOne<any>(
-          `SELECT s.id, s.register_number, s.name, s.parent_name, s.parent_phone, p.parent_name as p_parent_name, p.mobile_number
+          `SELECT s.id, s.register_number, s.name, s.parent_name, s.parent_phone, p.parent_name as p_parent_name, p.mobile_number,
+                  c.name as class_name, d.name as department_name
            FROM students s
+           LEFT JOIN classes c ON s.class_id = c.id
+           LEFT JOIN departments d ON c.department_id = d.id
            LEFT JOIN parents p ON p.student_id = s.id
            WHERE s.register_number = ?`,
           [rec.registerNumber]
@@ -166,6 +167,8 @@ VSB ENGINEERING COLLEGE`;
         const studentId = student?.id || rec.studentId || `std-tmp-${rec.registerNumber}`;
         const parentName = rec.parentName || student?.p_parent_name || student?.parent_name || 'Parent/Guardian';
         const parentMobile = rec.parentMobile || student?.mobile_number || student?.parent_phone || '';
+        const department = (rec as any).department || student?.department_name || 'Information Technology';
+        const className = (rec as any).className || student?.class_name || 'IT-C';
 
         // Duplicate check
         const existingSent = await db.queryOne<any>(
@@ -184,15 +187,35 @@ VSB ENGINEERING COLLEGE`;
         }));
         const formattedMarks = this.formatMarksBlock(marksEntries);
 
-        // Result is FAIL if ANY subject mark is < 60, otherwise PASS
-        const hasFailSubject = marksEntries.some(m => m.marksObtained < 60);
+        // Result is FAIL if ANY subject mark is < 50, otherwise PASS
+        const hasFailSubject = marksEntries.some(m => m.marksObtained < 50);
         const resultStatus = hasFailSubject ? 'FAIL' : 'PASS';
+
+        const subjectVars: Record<string, string | number> = {
+          department,
+          class_name: className,
+          overall_result: resultStatus
+        };
+
+        for (let i = 0; i < 6; i++) {
+          const entry = marksEntries[i];
+          const num = i + 1;
+          if (entry) {
+            subjectVars[`subject${num}_name`] = entry.subjectName;
+            subjectVars[`subject${num}_marks`] = entry.marksObtained;
+            subjectVars[`subject${num}_result`] = entry.marksObtained >= 50 ? 'Pass' : 'Fail';
+          } else {
+            subjectVars[`subject${num}_name`] = '';
+            subjectVars[`subject${num}_marks`] = '';
+            subjectVars[`subject${num}_result`] = '';
+          }
+        }
 
         const templateVars = {
           parent_name: parentName,
           student_name: rec.studentName,
           register_number: rec.registerNumber,
-          class_section: 'Information Technology - Year 3, Section C',
+          class_section: `${department} - ${className}`,
           exam_name: examName,
           marks: formattedMarks,
           total: rec.totalMarks,
@@ -201,7 +224,8 @@ VSB ENGINEERING COLLEGE`;
           max_marks: rec.maxMarks || (marksEntries.length * 100),
           percentage: rec.percentage,
           result: resultStatus,
-          college_name: collegeName
+          college_name: collegeName,
+          ...subjectVars
         };
 
         const renderedWhatsApp = this.renderTemplate(waTemplate, templateVars);
@@ -222,8 +246,13 @@ VSB ENGINEERING COLLEGE`;
           hasExistingSentNotification: !!existingSent,
           totalMarks: rec.totalMarks,
           maxMarks: rec.maxMarks || (marksEntries.length * 100),
-          percentage: rec.percentage
-        });
+          percentage: rec.percentage,
+          marks: rec.marks,
+          department,
+          className,
+          overallResult: resultStatus,
+          result: resultStatus
+        } as any);
       }
     }
 

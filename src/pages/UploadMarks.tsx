@@ -27,9 +27,11 @@ import { Exam, Subject, ColumnMapping, ValidationResult, PreviewRow, ClassItem, 
 
 interface UploadMarksProps {
   onProceedToSend: (examId: string, validatedRows: PreviewRow[], fileName: string, uploadId: string) => void;
+  initialDeptId?: string;
+  initialClassId?: string;
 }
 
-export const UploadMarks: React.FC<UploadMarksProps> = ({ onProceedToSend }) => {
+export const UploadMarks: React.FC<UploadMarksProps> = ({ onProceedToSend, initialDeptId, initialClassId }) => {
   // Step State: 1 = File Selection, 2 = Mapping, 3 = Preview & Validate
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
@@ -109,13 +111,17 @@ export const UploadMarks: React.FC<UploadMarksProps> = ({ onProceedToSend }) => 
   const [searchQuery, setSearchQuery] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Track if the initial load has applied the preset so the sync effect doesn't overwrite it
+  const presetAppliedRef = useRef(false);
 
   useEffect(() => {
     loadInitialData();
   }, []);
 
   // When Department, Year, Semester, or Section changes, sync Class & Subjects
+  // Skip on very first render — loadInitialData handles that inline
   useEffect(() => {
+    if (!presetAppliedRef.current) return;
     if (departments.length > 0) {
       syncClassAndSubjects();
     }
@@ -134,11 +140,59 @@ export const UploadMarks: React.FC<UploadMarksProps> = ({ onProceedToSend }) => 
       }
       setClasses(classList);
       setDepartments(deptList);
-      if (deptList.length > 0) {
-        setSelectedDepartmentId(deptList[0].id);
+
+      // Determine which dept/year/section to use
+      let deptId = initialDeptId || (deptList.length > 0 ? deptList[0].id : '');
+      let year = selectedYear;
+      let section = selectedSection;
+
+      if (initialClassId) {
+        const presetClass = classList.find((c: ClassItem) => c.id === initialClassId);
+        if (presetClass) {
+          year = String(presetClass.year);
+          section = presetClass.section;
+        }
       }
+
+      setSelectedDepartmentId(deptId);
+      setSelectedYear(year);
+      setSelectedSection(section);
+
+      // Sync class + subjects immediately using the live data (no stale closure)
+      const matchedClass = classList.find((c: ClassItem) =>
+        (deptId ? c.department_id === deptId : true) &&
+        String(c.year) === String(year) &&
+        c.section.toUpperCase() === section.toUpperCase()
+      );
+      const classIdToUse = matchedClass?.id || '';
+      setSelectedClassId(classIdToUse);
+
+      // Load students for this class
+      try {
+        const studentList = await api.students.list({
+          department_id: deptId,
+          year,
+          section,
+          class_id: classIdToUse || undefined
+        });
+        setClassStudents(studentList);
+      } catch (e) {
+        console.error('Failed to load class students:', e);
+      }
+
+      // Load subjects for this dept + semester
+      try {
+        const semSubjects = await api.academic.getSubjects(deptId, selectedSemester);
+        setSubjects(semSubjects);
+      } catch (e) {
+        console.error('Failed to load subjects:', e);
+      }
+
+      // Allow the sync effect to take over for subsequent user changes
+      presetAppliedRef.current = true;
     } catch (err: any) {
       console.error('Failed to load initial metadata:', err);
+      presetAppliedRef.current = true;
     }
   };
 
@@ -458,15 +512,7 @@ export const UploadMarks: React.FC<UploadMarksProps> = ({ onProceedToSend }) => 
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleDownloadClassMarksTemplate}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 hover:border-indigo-500 bg-white hover:bg-indigo-50/50 text-slate-700 hover:text-indigo-800 font-bold text-xs transition-all shadow-xs shrink-0 active:scale-95"
-              title="Download pre-filled Excel template for this class"
-            >
-              <Download className="w-4 h-4 text-indigo-600" />
-              <span>Download Excel Template</span>
-            </button>
+
           </div>
 
           {/* Phase 1: Academic & Class Selection Grid */}

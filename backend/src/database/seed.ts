@@ -208,7 +208,39 @@ Department of Information Technology,
 
   const holidaySMSBody = `Notice from {{college_name}}: Dear Parent of {{student_name}} (Register No: {{register_number}}): {{notice_message}}. Regards, {{college_name}}`;
 
+  const ia2WhatsAppBody = `VSB ENGINEERING COLLEGE, KARUR
+
+Dear Parent of {student_name},
+
+Internal Assessment – II Marks
+
+Register No.: {register_number}
+Class: {class_name} | Department: {department}
+
+{marks}
+
+Overall Result: {overall_result}
+
+Regards,
+VSB Engineering College, Karur.`;
+
+  const ia2SMSBody = `VSB ENGINEERING COLLEGE, KARUR: Dear Parent of {student_name}, Register No: {register_number}, Class: {class_name}, Dept: {department}. IA-II Marks: {marks}. Overall Result: {overall_result}. Regards, VSB Engineering College, Karur.`;
+
   const templates = [
+    {
+      id: 'tpl-ia2-whatsapp',
+      name: 'Internal Assessment – II Marks (WhatsApp)',
+      channel: 'WHATSAPP',
+      template_type: 'MARKS',
+      body: ia2WhatsAppBody
+    },
+    {
+      id: 'tpl-ia2-sms',
+      name: 'Internal Assessment – II Marks (SMS DLT)',
+      channel: 'SMS',
+      template_type: 'MARKS',
+      body: ia2SMSBody
+    },
     {
       id: 'tpl-marks-report-wa',
       name: 'Internal Examination Marks Report (Detailed)',
@@ -236,8 +268,7 @@ Department of Information Technology,
       channel: 'SMS',
       template_type: 'GENERAL',
       body: holidaySMSBody
-    }
-  ];
+    },];
 
   for (const t of templates) {
     try {

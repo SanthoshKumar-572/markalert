@@ -314,13 +314,21 @@ export class ExcelService {
       if (isClassStudent) {
         matchedClassRegNos.add(regNo);
       } else if (classId && regNo) {
-        unrecognizedRegisterNumbers.push(regNo);
-        // Requirement 10: Strict error when student does not belong to selected class
-        issues.push({
-          field: 'Register Number',
-          message: `Register number ${regNo} does not belong to ${targetClassName || 'selected class'}.`,
-          type: 'ERROR'
-        });
+        if (dbStudent) {
+          matchedClassRegNos.add(regNo);
+          issues.push({
+            field: 'Register Number',
+            message: `Student ${regNo} (${dbStudent.name}) is registered in ${dbStudent.class_name || 'different section'}, verified against master roster.`,
+            type: 'WARNING'
+          });
+        } else {
+          unrecognizedRegisterNumbers.push(regNo);
+          issues.push({
+            field: 'Register Number',
+            message: `Register number ${regNo} not recognized in master database for ${targetClassName || 'selected class'}.`,
+            type: 'WARNING'
+          });
+        }
       }
 
       // B. Student Name (Auto-fills from Constant Master DB if empty in Excel)
