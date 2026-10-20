@@ -318,14 +318,14 @@ export class ExcelService {
           matchedClassRegNos.add(regNo);
           issues.push({
             field: 'Register Number',
-            message: `Student ${regNo} (${dbStudent.name}) is registered in ${dbStudent.class_name || 'different section'}, verified against master roster.`,
+            message: `Student ${regNo} (${dbStudent.name}) does not belong to selected class (registered in ${dbStudent.class_name || 'different section'}).`,
             type: 'WARNING'
           });
         } else {
           unrecognizedRegisterNumbers.push(regNo);
           issues.push({
             field: 'Register Number',
-            message: `Register number ${regNo} not recognized in master database for ${targetClassName || 'selected class'}.`,
+            message: `Student ${regNo} does not belong to selected class (${targetClassName || 'selected class'}). Not recognized in master database.`,
             type: 'WARNING'
           });
         }
