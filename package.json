@@ -1,0 +1,15 @@
+{
+  "name": "markalert-root",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix markalert run dev",
+    "dev:client": "npm --prefix markalert run dev:client",
+    "dev:server": "npm --prefix markalert run dev:server",
+    "build": "npm --prefix markalert run build",
+    "test": "npm --prefix markalert test",
+    "seed": "npm --prefix markalert run seed",
+    "mobile:sync": "npm --prefix markalert run cap:sync",
+    "mobile:open": "npm --prefix markalert run cap:open"
+  }
+}

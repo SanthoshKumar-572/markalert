@@ -1,0 +1,18 @@
+{
+  "short_name": "CollegeMarks",
+  "name": "CollegeMarks - V.S.B. Engineering College",
+  "description": "Internal Examination Marks & Parent Notification Portal",
+  "icons": [
+    {
+      "src": "/app-logo.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#1c060d",
+  "theme_color": "#7A1A2C",
+  "display": "standalone",
+  "orientation": "portrait"
+}

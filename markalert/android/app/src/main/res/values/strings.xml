@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CollegeMarks</string>
+    <string name="title_activity_main">CollegeMarks</string>
+    <string name="package_name">com.college.marks</string>
+    <string name="custom_url_scheme">com.college.marks</string>
+</resources>
