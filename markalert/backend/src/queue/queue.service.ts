@@ -23,10 +23,38 @@ class QueueService {
   private isProcessingInMemory: boolean = false;
 
   public async init(): Promise<void> {
+    const redisUrl = config.redis.url;
+    const isLocalRedis = !redisUrl || redisUrl.includes('localhost') || redisUrl.includes('127.0.0.1');
+
+    // Skip attempting Redis connection if not provided or pointing to localhost in production
+    if (!redisUrl || (config.nodeEnv === 'production' && isLocalRedis)) {
+      this.isRedisConnected = false;
+      this.bullQueue = null;
+      this.bullWorker = null;
+      console.log('[Queue] Running with robust in-process async worker (Redis not configured).');
+      return;
+    }
+
     try {
-      // Attempt connection to Redis
+      const Redis = (await import('ioredis')).default;
+      const testClient = new Redis(redisUrl, {
+        maxRetriesPerRequest: 1,
+        connectTimeout: 2000,
+        lazyConnect: true,
+        retryStrategy: () => null,
+      });
+
+      testClient.on('error', () => {
+        // Absorb connection errors during pre-flight check
+      });
+
+      await testClient.connect();
+      await testClient.ping();
+      testClient.disconnect();
+
+      // Redis is alive, initialize BullMQ
       this.bullQueue = new Queue('markalert-notifications', {
-        connection: { url: config.redis.url },
+        connection: { url: redisUrl },
         defaultJobOptions: {
           attempts: 3,
           backoff: {
@@ -38,13 +66,17 @@ class QueueService {
         },
       });
 
+      this.bullQueue.on('error', err => {
+        console.warn(`[BullMQ Queue Warning]:`, err.message);
+      });
+
       this.bullWorker = new Worker(
         'markalert-notifications',
         async (job: Job<NotificationJobData>) => {
           await this.processNotificationJob(job.data);
         },
         {
-          connection: { url: config.redis.url },
+          connection: { url: redisUrl },
           concurrency: 5,
         }
       );
@@ -55,6 +87,10 @@ class QueueService {
 
       this.bullWorker.on('failed', (job, err) => {
         console.error(`[BullMQ] Notification job ${job?.id} failed:`, err.message);
+      });
+
+      this.bullWorker.on('error', err => {
+        console.warn(`[BullMQ Worker Warning]:`, err.message);
       });
 
       this.isRedisConnected = true;
