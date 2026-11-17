@@ -2,8 +2,51 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 generator client {
   provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  FACULTY
+}
+
+enum BatchStatus {
+  DRAFT
+  VALIDATED
+  QUEUED
+  PROCESSING
+  COMPLETED
+  PARTIAL
+  FAILED
+}
+
+enum RecipientStatus {
+  VALID
+  WARNING
+  ERROR
+}
+
+enum NotificationChannel {
+  WHATSAPP
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  QUEUED
+  PROCESSING
+  SENT
+  DELIVERED
+  FAILED
+  UNKNOWN
+}
+
+enum TemplateChannel {
+  WHATSAPP
+  SMS
+  BOTH
 }
 
 model User {
@@ -15,13 +58,13 @@ model User {
   department    String
   designation   String
   mobile_number String?
-  role          String   @default("FACULTY")
+  role          Role     @default(FACULTY)
   is_active     Boolean  @default(true)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  batches        NotificationBatch[]
-  audit_logs     AuditLog[]
+  batches       NotificationBatch[]
+  audit_logs    AuditLog[]
   refresh_tokens RefreshToken[]
 
   @@map("users")
@@ -42,20 +85,20 @@ model RefreshToken {
 }
 
 model NotificationBatch {
-  id                  String    @id @default(uuid())
+  id                  String      @id @default(uuid())
   created_by          String
-  creator             User      @relation(fields: [created_by], references: [id])
+  creator             User        @relation(fields: [created_by], references: [id])
   exam_name           String
   department          String?
   class_name          String?
   academic_year       String?
   original_file_name  String
-  total_records       Int       @default(0)
-  valid_records       Int       @default(0)
-  invalid_records     Int       @default(0)
-  total_notifications Int       @default(0)
-  batch_status        String    @default("DRAFT")
-  created_at          DateTime  @default(now())
+  total_records       Int         @default(0)
+  valid_records       Int         @default(0)
+  invalid_records     Int         @default(0)
+  total_notifications Int         @default(0)
+  batch_status        BatchStatus @default(DRAFT)
+  created_at          DateTime    @default(now())
   completed_at        DateTime?
 
   recipients    BatchRecipient[]
@@ -67,7 +110,7 @@ model NotificationBatch {
 }
 
 model BatchRecipient {
-  id               String            @id @default(uuid())
+  id               String          @id @default(uuid())
   batch_id         String
   batch            NotificationBatch @relation(fields: [batch_id], references: [id], onDelete: Cascade)
   register_number  String
@@ -75,13 +118,13 @@ model BatchRecipient {
   parent_name      String?
   encrypted_phone  String
   phone_masked     String
-  marks_data       String // JSON string: Record<subjectName, { marksObtained: number, maxMarks: number }>
-  total_marks      Float
-  max_marks        Float
-  percentage       Float
-  status           String            @default("VALID")
-  issues           String? // JSON string: Array<{ field: string, message: string, type: string }>
-  created_at       DateTime          @default(now())
+  marks_data       String
+  total_marks      Decimal         @db.Decimal(6, 2)
+  max_marks        Decimal         @db.Decimal(6, 2)
+  percentage       Decimal         @db.Decimal(5, 2)
+  status           RecipientStatus @default(VALID)
+  issues           String?
+  created_at       DateTime        @default(now())
 
   @@index([batch_id])
   @@index([register_number])
@@ -89,22 +132,22 @@ model BatchRecipient {
 }
 
 model Notification {
-  id                  String            @id @default(uuid())
+  id                  String              @id @default(uuid())
   batch_id            String
-  batch               NotificationBatch @relation(fields: [batch_id], references: [id], onDelete: Cascade)
-  recipient_reference String // e.g. Register Number / Masked Phone
-  channel             String // WHATSAPP | SMS
+  batch               NotificationBatch   @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+  recipient_reference String
+  channel             NotificationChannel
   message_text        String
   provider_message_id String?
-  status              String            @default("PENDING")
-  attempts            Int               @default(0)
+  status              NotificationStatus  @default(PENDING)
+  attempts            Int                 @default(0)
   sent_at             DateTime?
   delivered_at        DateTime?
   failed_at           DateTime?
   error_code          String?
   error_message       String?
-  created_at          DateTime          @default(now())
-  updated_at          DateTime          @updatedAt
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
 
   events NotificationEvent[]
 
@@ -120,7 +163,7 @@ model NotificationEvent {
   notification_id  String
   notification     Notification @relation(fields: [notification_id], references: [id], onDelete: Cascade)
   event_type       String
-  provider_payload String? // Sanitized JSON payload
+  provider_payload String?
   created_at       DateTime     @default(now())
 
   @@index([notification_id])
@@ -128,13 +171,13 @@ model NotificationEvent {
 }
 
 model MessageTemplate {
-  id            String   @id @default(uuid())
+  id            String          @id @default(uuid())
   name          String
-  channel       String   @default("BOTH")
+  channel       TemplateChannel @default(BOTH)
   template_text String
-  is_active     Boolean  @default(true)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  is_active     Boolean         @default(true)
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
 
   @@map("message_templates")
 }
