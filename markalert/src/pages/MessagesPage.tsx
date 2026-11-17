@@ -57,6 +57,17 @@ export const MessagesPage: React.FC = () => {
       return new Set();
     }
   });
+
+  // Track SMS 1-click status per student in localStorage so status persists
+  const [sentSmsRecipientIds, setSentSmsRecipientIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(`sms_sent_${batchId}`);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { data: previewData, isLoading } = useQuery({
@@ -78,6 +89,16 @@ export const MessagesPage: React.FC = () => {
     });
   };
 
+  const markSmsAsSent = (recipientId: string) => {
+    setSentSmsRecipientIds(prev => {
+      const next = new Set(prev).add(recipientId);
+      try {
+        localStorage.setItem(`sms_sent_${batchId}`, JSON.stringify(Array.from(next)));
+      } catch {}
+      return next;
+    });
+  };
+
   const copyMessage = async (text: string, id: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -93,6 +114,14 @@ export const MessagesPage: React.FC = () => {
     const digits = (std.parentMobile || std.parentMobileMasked || '').replace(/\D/g, '');
     if (!digits) return '';
     return `https://wa.me/${digits}?text=${encodeURIComponent(std.renderedWhatsApp)}`;
+  };
+
+  const getSmsUrl = (std?: MessagePreviewItem) => {
+    if (!std) return '';
+    const digits = (std.parentMobile || std.parentMobileMasked || '').replace(/\D/g, '');
+    if (!digits) return '';
+    const phone = digits.length === 10 ? digits : digits.slice(-10);
+    return `sms:+91${phone}?body=${encodeURIComponent(std.renderedSMS)}`;
   };
 
   // Initialize custom template editor with default WhatsApp template
@@ -333,27 +362,39 @@ export const MessagesPage: React.FC = () => {
       {/* Student Selection Panel */}
       {!isLoading && previews.length > 0 && (
         <div className="bg-white border border-stone-200/90 rounded-2xl p-5 shadow-xs space-y-4">
-          {/* 1-Click WhatsApp Feature Announcement Banner */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-white border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          {/* 1-Click WhatsApp & SMS Feature Announcement Banner */}
+          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-50 border border-emerald-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
-                <MessageSquare className="w-5 h-5 fill-white" />
+              <div className="flex items-center gap-1.5 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#25D366] text-white flex items-center justify-center shadow-xs">
+                  <MessageSquare className="w-4 h-4 fill-white" />
+                </div>
+                <div className="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs">
+                  <Smartphone className="w-4 h-4 fill-white" />
+                </div>
               </div>
               <div>
-                <h4 className="text-xs font-bold text-emerald-950 flex items-center gap-2">
-                  <span>Direct 1-Click WhatsApp Dispatch</span>
+                <h4 className="text-xs font-bold text-stone-900 flex items-center gap-2">
+                  <span>Direct 1-Click WhatsApp & SMS Dispatch</span>
                   <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">100% Free</span>
                 </h4>
-                <p className="text-[11px] text-emerald-800 mt-0.5">
-                  Click the green <strong>"Send WhatsApp"</strong> button on any student row below to open WhatsApp instantly with their personalized mark sheet pre-filled.
+                <p className="text-[11px] text-stone-600 mt-0.5">
+                  Tap the green <strong>"WhatsApp"</strong> or blue <strong>"SMS"</strong> button on any student row below to open WhatsApp or your phone's SMS app with their personalized marks pre-filled.
                 </p>
               </div>
             </div>
-            {sentRecipientIds.size > 0 && (
-              <span className="text-xs font-bold text-emerald-900 bg-white/90 border border-emerald-200 px-3 py-1.5 rounded-lg whitespace-nowrap shadow-2xs">
-                ✓ {sentRecipientIds.size} of {previews.length} Sent
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {sentRecipientIds.size > 0 && (
+                <span className="text-xs font-bold text-emerald-900 bg-white/90 border border-emerald-200 px-2.5 py-1 rounded-lg whitespace-nowrap shadow-2xs">
+                  WA: {sentRecipientIds.size} Sent
+                </span>
+              )}
+              {sentSmsRecipientIds.size > 0 && (
+                <span className="text-xs font-bold text-sky-900 bg-white/90 border border-sky-200 px-2.5 py-1 rounded-lg whitespace-nowrap shadow-2xs">
+                  SMS: {sentSmsRecipientIds.size} Sent
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
@@ -430,7 +471,7 @@ export const MessagesPage: React.FC = () => {
                   <th className="py-2.5 px-3">Parent Mobile</th>
                   <th className="py-2.5 px-3 text-center">Percentage</th>
                   <th className="py-2.5 px-3 text-center">Result</th>
-                  <th className="py-2.5 px-3 text-center">1-Click WhatsApp</th>
+                  <th className="py-2.5 px-3 text-center">1-Click Dispatch</th>
                   <th className="py-2.5 px-3 text-right">Preview</th>
                 </tr>
               </thead>
@@ -440,7 +481,9 @@ export const MessagesPage: React.FC = () => {
                   const isFailed = std.percentage < 50;
                   const isCurrentPreview = idx === selectedStudentIndex;
                   const isSent = sentRecipientIds.has(std.recipientId);
+                  const isSmsSent = sentSmsRecipientIds.has(std.recipientId);
                   const waUrl = getWhatsAppUrl(std);
+                  const smsUrl = getSmsUrl(std);
 
                   return (
                     <tr
@@ -481,25 +524,45 @@ export const MessagesPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-2 px-3 text-center">
-                        {waUrl ? (
-                          <a
-                            href={waUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => markAsSent(std.recipientId)}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shadow-2xs ${
-                              isSent
-                                ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                                : 'bg-[#25D366] hover:bg-[#20ba5a] text-white'
-                            }`}
-                            title={`Open WhatsApp chat for ${std.studentName}'s parent`}
-                          >
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            <span>{isSent ? 'Sent ✓' : 'Send WhatsApp'}</span>
-                          </a>
-                        ) : (
-                          <span className="text-[10px] text-stone-400 font-mono">No Phone</span>
-                        )}
+                        <div className="flex items-center justify-center gap-1.5">
+                          {waUrl ? (
+                            <a
+                              href={waUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => markAsSent(std.recipientId)}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shadow-2xs ${
+                                isSent
+                                  ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                  : 'bg-[#25D366] hover:bg-[#20ba5a] text-white'
+                              }`}
+                              title={`Open WhatsApp for ${std.studentName}'s parent`}
+                            >
+                              <MessageSquare className="w-3 h-3 fill-white" />
+                              <span>{isSent ? 'WA ✓' : 'WhatsApp'}</span>
+                            </a>
+                          ) : null}
+
+                          {smsUrl ? (
+                            <a
+                              href={smsUrl}
+                              onClick={() => markSmsAsSent(std.recipientId)}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shadow-2xs ${
+                                isSmsSent
+                                  ? 'bg-sky-100 text-sky-800 hover:bg-sky-200'
+                                  : 'bg-sky-600 hover:bg-sky-700 text-white'
+                              }`}
+                              title={`Open SMS compose app for ${std.studentName}'s parent`}
+                            >
+                              <Smartphone className="w-3 h-3 fill-white" />
+                              <span>{isSmsSent ? 'SMS ✓' : 'SMS'}</span>
+                            </a>
+                          ) : null}
+
+                          {!waUrl && !smsUrl && (
+                            <span className="text-[10px] text-stone-400 font-mono">No Phone</span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-2 px-3 text-right">
                         <button
@@ -642,23 +705,105 @@ export const MessagesPage: React.FC = () => {
           {/* SMS Gateway Preview Card */}
           <Card className="border-sky-200/80">
             <CardHeader
-              title="DLT SMS Message Preview"
+              title="SMS Message Preview"
               description={`Recipient: ${activeStudent.parentName} (${activeStudent.parentMobileMasked})`}
               className="bg-sky-50/50"
               action={
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 uppercase">
-                  SMS Preview
+                  1-Click Ready
                 </span>
               }
             />
-            <CardContent className="bg-stone-100 p-6 min-h-[340px] flex items-center justify-center">
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 max-w-sm w-full space-y-2">
+            <CardContent className="bg-sky-50/30 p-5 space-y-4">
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-sky-200/80 max-w-sm mx-auto w-full space-y-2">
                 <div className="flex items-center justify-between text-[11px] text-stone-500 font-semibold border-b border-stone-100 pb-2">
-                  <span>Sender: MRKALR (DLT)</span>
-                  <span>160 char safe</span>
+                  <span className="text-sky-800 font-bold">SMS Composer Format</span>
+                  <span className="font-mono text-[10px] bg-sky-50 px-2 py-0.5 rounded text-sky-700 font-semibold">
+                    {activeStudent.renderedSMS.length} chars
+                  </span>
                 </div>
                 <div className="text-xs text-stone-800 leading-relaxed font-sans whitespace-pre-line">
                   {activeStudent.renderedSMS}
+                </div>
+              </div>
+
+              {/* 1-Click SMS Action Area */}
+              <div className="bg-white/95 rounded-xl p-3.5 border border-sky-200 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-sky-600 animate-ping" />
+                    <span className="text-xs font-bold text-stone-900">
+                      Direct SMS Dispatch (100% Free)
+                    </span>
+                  </div>
+                  {sentSmsRecipientIds.has(activeStudent.recipientId) && (
+                    <span className="text-[10px] bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Already Sent
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {getSmsUrl(activeStudent) ? (
+                    <a
+                      href={getSmsUrl(activeStudent)}
+                      onClick={() => markSmsAsSent(activeStudent.recipientId)}
+                      className="flex-1 min-h-[42px] px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-[0.98] cursor-pointer"
+                    >
+                      <Smartphone className="w-4 h-4 fill-white" />
+                      <span>Send SMS to {activeStudent.studentName}'s Parent</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      disabled
+                      className="flex-1 min-h-[42px] px-4 py-2 rounded-xl bg-stone-200 text-stone-500 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
+                    >
+                      <span>No Parent Phone Available</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => copyMessage(activeStudent.renderedSMS, `sms_${activeStudent.recipientId}`)}
+                    className="min-h-[42px] px-3.5 py-2 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    title="Copy formatted SMS text"
+                  >
+                    {copiedId === `sms_${activeStudent.recipientId}` ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-sky-600" />
+                        <span className="text-sky-700 font-bold">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-stone-500" />
+                        <span>Copy Text</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Quick Next / Prev Navigator */}
+                <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
+                  <button
+                    type="button"
+                    disabled={selectedStudentIndex <= 0}
+                    onClick={() => setSelectedStudentIndex(prev => Math.max(0, prev - 1))}
+                    className="font-semibold text-sky-800 hover:text-sky-900 disabled:text-stone-300 flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" /> Previous Student
+                  </button>
+                  <span className="text-[11px] font-medium text-stone-500">
+                    Student {selectedStudentIndex + 1} of {previews.length}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={selectedStudentIndex >= previews.length - 1}
+                    onClick={() => setSelectedStudentIndex(prev => Math.min(previews.length - 1, prev + 1))}
+                    className="font-semibold text-sky-800 hover:text-sky-900 disabled:text-stone-300 flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    Next Student <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </CardContent>
