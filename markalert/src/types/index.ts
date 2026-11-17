@@ -93,6 +93,7 @@ export interface MessagePreviewItem {
   studentName: string;
   parentName: string;
   parentMobileMasked: string;
+  parentMobile?: string;
   totalMarks: number;
   maxMarks: number;
   percentage: number;

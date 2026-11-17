@@ -2,6 +2,7 @@ import { NotificationChannel, NotificationStatus, RecipientStatus, BatchStatus, 
 import { prisma } from '../../database/prisma';
 import { queueService } from '../../queue/queue.service';
 import { renderTemplate, formatMarksBlock, SubjectMarkEntry, buildTemplateVariables } from '../../utils/template';
+import { decryptText } from '../../utils/crypto';
 import { templatesService } from '../templates/templates.service';
 import { config } from '../../config';
 import { logAudit } from '../../middleware/auth';
@@ -33,12 +34,28 @@ export class NotificationsService {
       const renderedWhatsApp = renderTemplate(defaultWaTemplate, templateVars);
       const renderedSMS = renderTemplate(defaultSmsTemplate, templateVars);
 
+      let parentMobile = '';
+      try {
+        const raw = r.encrypted_phone ? decryptText(r.encrypted_phone) : '';
+        const digits = raw.replace(/\D/g, '');
+        if (digits.length === 10) {
+          parentMobile = `91${digits}`;
+        } else if (digits.length > 10) {
+          parentMobile = digits;
+        } else {
+          parentMobile = digits;
+        }
+      } catch {
+        parentMobile = '';
+      }
+
       return {
         recipientId: r.id,
         registerNumber: r.register_number,
         studentName: r.student_name,
         parentName: r.parent_name || 'Parent/Guardian',
         parentMobileMasked: r.phone_masked,
+        parentMobile,
         totalMarks: Number(r.total_marks),
         maxMarks: Number(r.max_marks),
         percentage: Number(r.percentage),

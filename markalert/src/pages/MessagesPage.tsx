@@ -14,6 +14,9 @@ import {
   RotateCcw,
   Sparkles,
   Users,
+  Copy,
+  Check,
+  ExternalLink,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
@@ -45,6 +48,17 @@ export const MessagesPage: React.FC = () => {
   const [isSending, setIsSending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Track WhatsApp 1-click status per student in localStorage so status persists
+  const [sentRecipientIds, setSentRecipientIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(`wa_sent_${batchId}`);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   const { data: previewData, isLoading } = useQuery({
     queryKey: ['batch-messages-preview', batchId, customTemplate],
     queryFn: () => api.batches.getMessagesPreview(batchId!, customTemplate || undefined),
@@ -53,6 +67,33 @@ export const MessagesPage: React.FC = () => {
 
   const previews = previewData?.previews || [];
   const activeStudent: MessagePreviewItem | undefined = previews[selectedStudentIndex] || previews[0];
+
+  const markAsSent = (recipientId: string) => {
+    setSentRecipientIds(prev => {
+      const next = new Set(prev).add(recipientId);
+      try {
+        localStorage.setItem(`wa_sent_${batchId}`, JSON.stringify(Array.from(next)));
+      } catch {}
+      return next;
+    });
+  };
+
+  const copyMessage = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
+  };
+
+  const getWhatsAppUrl = (std?: MessagePreviewItem) => {
+    if (!std) return '';
+    const digits = (std.parentMobile || std.parentMobileMasked || '').replace(/\D/g, '');
+    if (!digits) return '';
+    return `https://wa.me/${digits}?text=${encodeURIComponent(std.renderedWhatsApp)}`;
+  };
 
   // Initialize custom template editor with default WhatsApp template
   useEffect(() => {
@@ -289,6 +330,29 @@ export const MessagesPage: React.FC = () => {
       {/* Student Selection Panel */}
       {!isLoading && previews.length > 0 && (
         <div className="bg-white border border-stone-200/90 rounded-2xl p-5 shadow-xs space-y-4">
+          {/* 1-Click WhatsApp Feature Announcement Banner */}
+          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-white border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
+                <MessageSquare className="w-5 h-5 fill-white" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-emerald-950 flex items-center gap-2">
+                  <span>Direct 1-Click WhatsApp Dispatch</span>
+                  <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">100% Free</span>
+                </h4>
+                <p className="text-[11px] text-emerald-800 mt-0.5">
+                  Click the green <strong>"Send WhatsApp"</strong> button on any student row below to open WhatsApp instantly with their personalized mark sheet pre-filled.
+                </p>
+              </div>
+            </div>
+            {sentRecipientIds.size > 0 && (
+              <span className="text-xs font-bold text-emerald-900 bg-white/90 border border-emerald-200 px-3 py-1.5 rounded-lg whitespace-nowrap shadow-2xs">
+                ✓ {sentRecipientIds.size} of {previews.length} Sent
+              </span>
+            )}
+          </div>
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
             <div className="flex items-center gap-2.5">
               <span className="w-8 h-8 rounded-lg bg-[#fdf2f4] text-[#7A1A2C] flex items-center justify-center font-bold shrink-0">
@@ -339,7 +403,7 @@ export const MessagesPage: React.FC = () => {
           </div>
 
           {/* Student Selection Table */}
-          <div className="max-h-64 overflow-y-auto border border-stone-200 rounded-xl">
+          <div className="max-h-72 overflow-y-auto border border-stone-200 rounded-xl">
             <table className="w-full text-left text-xs">
               <thead className="bg-stone-50 border-b border-stone-200 text-stone-700 sticky top-0 font-bold uppercase text-[10px]">
                 <tr>
@@ -356,7 +420,8 @@ export const MessagesPage: React.FC = () => {
                   <th className="py-2.5 px-3">Parent Mobile</th>
                   <th className="py-2.5 px-3 text-center">Percentage</th>
                   <th className="py-2.5 px-3 text-center">Result</th>
-                  <th className="py-2.5 px-3 text-right">Message Preview</th>
+                  <th className="py-2.5 px-3 text-center">1-Click WhatsApp</th>
+                  <th className="py-2.5 px-3 text-right">Preview</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -364,6 +429,8 @@ export const MessagesPage: React.FC = () => {
                   const isSelected = selectedRecipientIds.has(std.recipientId);
                   const isFailed = std.percentage < 50;
                   const isCurrentPreview = idx === selectedStudentIndex;
+                  const isSent = sentRecipientIds.has(std.recipientId);
+                  const waUrl = getWhatsAppUrl(std);
 
                   return (
                     <tr
@@ -403,6 +470,27 @@ export const MessagesPage: React.FC = () => {
                           {isFailed ? 'FAIL' : 'PASS'}
                         </span>
                       </td>
+                      <td className="py-2 px-3 text-center">
+                        {waUrl ? (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => markAsSent(std.recipientId)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shadow-2xs ${
+                              isSent
+                                ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                : 'bg-[#25D366] hover:bg-[#20ba5a] text-white'
+                            }`}
+                            title={`Open WhatsApp chat for ${std.studentName}'s parent`}
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>{isSent ? 'Sent ✓' : 'Send WhatsApp'}</span>
+                          </a>
+                        ) : (
+                          <span className="text-[10px] text-stone-400 font-mono">No Phone</span>
+                        )}
+                      </td>
                       <td className="py-2 px-3 text-right">
                         <button
                           type="button"
@@ -413,7 +501,7 @@ export const MessagesPage: React.FC = () => {
                               : 'text-[#7A1A2C] hover:bg-[#fdf2f4]'
                           }`}
                         >
-                          {isCurrentPreview ? 'Previewing' : 'Preview Message'}
+                          {isCurrentPreview ? 'Previewing' : 'View'}
                         </button>
                       </td>
                     </tr>
@@ -436,23 +524,106 @@ export const MessagesPage: React.FC = () => {
           {/* WhatsApp Preview Card */}
           <Card className="border-emerald-200/80">
             <CardHeader
-              title="WhatsApp Cloud Message Preview"
+              title="WhatsApp Message Preview"
               description={`Recipient: ${activeStudent.parentName} (${activeStudent.parentMobileMasked})`}
               className="bg-emerald-50/50"
               action={
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 uppercase">
-                  WhatsApp Preview
+                  1-Click Ready
                 </span>
               }
             />
-            <CardContent className="bg-[#EFEAE2] p-6 min-h-[340px] flex items-center justify-center">
-              <div className="bg-white rounded-2xl rounded-tl-xs p-4 shadow-md max-w-sm w-full space-y-3 text-stone-800 font-sans border border-stone-200/60">
+            <CardContent className="bg-[#EFEAE2] p-5 space-y-4">
+              {/* Chat Bubble */}
+              <div className="bg-white rounded-2xl rounded-tl-xs p-4 shadow-md max-w-sm mx-auto w-full space-y-3 text-stone-800 font-sans border border-stone-200/60">
                 <div className="text-xs whitespace-pre-line leading-relaxed font-sans">
                   {activeStudent.renderedWhatsApp}
                 </div>
                 <div className="flex items-center justify-end gap-1 text-[10px] text-stone-400 font-medium">
                   <span>12:00 PM</span>
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                </div>
+              </div>
+
+              {/* 1-Click WhatsApp Action Area */}
+              <div className="bg-white/95 rounded-xl p-3.5 border border-emerald-200/90 shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#25D366] animate-ping" />
+                    <span className="text-xs font-bold text-stone-900">
+                      Direct WhatsApp Dispatch (100% Free)
+                    </span>
+                  </div>
+                  {sentRecipientIds.has(activeStudent.recipientId) && (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Already Sent
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {getWhatsAppUrl(activeStudent) ? (
+                    <a
+                      href={getWhatsAppUrl(activeStudent)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => markAsSent(activeStudent.recipientId)}
+                      className="flex-1 min-h-[42px] px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-[0.98] cursor-pointer"
+                    >
+                      <MessageSquare className="w-4 h-4 fill-white" />
+                      <span>Send to {activeStudent.studentName}'s Parent</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      disabled
+                      className="flex-1 min-h-[42px] px-4 py-2 rounded-xl bg-stone-200 text-stone-500 font-bold text-xs flex items-center justify-center gap-2 cursor-not-allowed"
+                    >
+                      <span>No Parent Phone Available</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => copyMessage(activeStudent.renderedWhatsApp, activeStudent.recipientId)}
+                    className="min-h-[42px] px-3.5 py-2 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    title="Copy formatted message text"
+                  >
+                    {copiedId === activeStudent.recipientId ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-700 font-bold">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-stone-500" />
+                        <span>Copy Text</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Quick Next / Prev Navigator */}
+                <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-xs">
+                  <button
+                    type="button"
+                    disabled={selectedStudentIndex <= 0}
+                    onClick={() => setSelectedStudentIndex(prev => Math.max(0, prev - 1))}
+                    className="font-semibold text-emerald-800 hover:text-emerald-900 disabled:text-stone-300 flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" /> Previous Student
+                  </button>
+                  <span className="text-[11px] font-medium text-stone-500">
+                    Student {selectedStudentIndex + 1} of {previews.length}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={selectedStudentIndex >= previews.length - 1}
+                    onClick={() => setSelectedStudentIndex(prev => Math.min(previews.length - 1, prev + 1))}
+                    className="font-semibold text-emerald-800 hover:text-emerald-900 disabled:text-stone-300 flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    Next Student <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </CardContent>
