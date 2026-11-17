@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   ChevronRight,
   BookOpen,
+  Smartphone,
 } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import clsx from 'clsx';
@@ -175,6 +176,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                     {user?.employee_id}
                   </span>
                 </div>
+                <div className="flex items-center gap-1 mt-1 text-[11px] text-stone-600 font-medium">
+                  <Smartphone className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span className="truncate">
+                    {user?.mobile_number ? `+91 ${user.mobile_number}` : 'Sync Mobile'}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -208,7 +215,13 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           </div>
 
           <div className="flex items-center gap-3 ml-auto">
-            <span className="text-xs font-semibold text-stone-600 hidden sm:inline">
+            {user?.mobile_number && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>+91 {user.mobile_number}</span>
+              </span>
+            )}
+            <span className="text-xs font-semibold text-stone-600 hidden md:inline">
               {user?.department || 'V.S.B. Engineering College, Karur'}
             </span>
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs ring-4 ring-emerald-50" title="System Online & Connected" />

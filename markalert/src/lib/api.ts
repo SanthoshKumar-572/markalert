@@ -85,6 +85,10 @@ export const api = {
       const res = await apiClient.get('/auth/me');
       return res.data.data;
     },
+    async updateProfile(data: { mobile_number?: string; full_name?: string }): Promise<User> {
+      const res = await apiClient.patch('/auth/profile', data);
+      return res.data.data;
+    },
   },
 
   admin: {

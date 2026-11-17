@@ -43,6 +43,17 @@ export class AuthController {
       res.status(404).json({ success: false, error: err.message || 'Profile not found' });
     }
   }
+
+  public async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const { mobile_number, full_name } = req.body;
+      const updated = await authService.updateProfile(userId, { mobile_number, full_name });
+      res.json({ success: true, data: updated });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: err.message || 'Failed to update profile' });
+    }
+  }
 }
 
 export const authController = new AuthController();

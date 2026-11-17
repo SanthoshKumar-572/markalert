@@ -61,9 +61,17 @@ export const DashboardPage: React.FC = () => {
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-stone-900 leading-tight mt-0.5">
             Welcome, {user?.full_name || 'Faculty Member'}
           </h1>
-          <p className="text-xs text-stone-500 font-medium mt-0.5">
-            {user?.department || 'Department of Information Technology'} · V.S.B. Engineering College
-          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-0.5">
+            <p className="text-xs text-stone-500 font-medium">
+              {user?.department || 'Department of Information Technology'} · V.S.B. Engineering College
+            </p>
+            {user?.mobile_number && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Mobile Synced: +91 {user.mobile_number}</span>
+              </span>
+            )}
+          </div>
         </div>
 
         <button

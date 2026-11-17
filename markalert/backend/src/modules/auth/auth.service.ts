@@ -11,22 +11,53 @@ function hashToken(token: string): string {
 }
 
 export class AuthService {
-  public async login(email: string, passwordPlain: string, ipAddress?: string) {
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
-      select: {
-        id: true,
-        email: true,
-        password_hash: true,
-        is_active: true,
-        role: true,
-        full_name: true,
-        department: true,
-        designation: true,
-        mobile_number: true,
-        employee_id: true,
-      },
-    });
+  public async login(identifier: string, passwordPlain: string, ipAddress?: string) {
+    const trimmed = (identifier || '').trim();
+    const cleanDigits = trimmed.replace(/\D/g, '');
+    const isPhone = cleanDigits.length >= 10 && cleanDigits.length <= 13;
+
+    let user;
+    if (isPhone) {
+      const last10 = cleanDigits.slice(-10);
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { mobile_number: last10 },
+            { mobile_number: `+91${last10}` },
+            { mobile_number: `91${last10}` },
+            { mobile_number: trimmed },
+          ],
+        },
+        select: {
+          id: true,
+          email: true,
+          password_hash: true,
+          is_active: true,
+          role: true,
+          full_name: true,
+          department: true,
+          designation: true,
+          mobile_number: true,
+          employee_id: true,
+        },
+      });
+    } else {
+      user = await prisma.user.findUnique({
+        where: { email: trimmed.toLowerCase() },
+        select: {
+          id: true,
+          email: true,
+          password_hash: true,
+          is_active: true,
+          role: true,
+          full_name: true,
+          department: true,
+          designation: true,
+          mobile_number: true,
+          employee_id: true,
+        },
+      });
+    }
 
     if (!user) {
       throw new Error('Invalid email or password');
@@ -181,6 +212,33 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  public async updateProfile(userId: string, data: { mobile_number?: string; full_name?: string }) {
+    let cleanMobile = data.mobile_number;
+    if (cleanMobile) {
+      cleanMobile = cleanMobile.replace(/\D/g, '').slice(-10);
+    }
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(cleanMobile !== undefined ? { mobile_number: cleanMobile } : {}),
+        ...(data.full_name ? { full_name: data.full_name } : {}),
+      },
+      select: {
+        id: true,
+        email: true,
+        full_name: true,
+        employee_id: true,
+        role: true,
+        department: true,
+        designation: true,
+        mobile_number: true,
+        is_active: true,
+        created_at: true,
+      },
+    });
+    return updated;
   }
 }
 

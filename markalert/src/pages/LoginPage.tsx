@@ -11,7 +11,7 @@ import appLogo from '../assets/app-logo.png';
 import vsbLogo from '../assets/vsb-logo.png';
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid academic email address'),
+  email: z.string().min(3, 'Please enter your academic email or registered mobile number'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -136,13 +136,13 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
-                {isAdminMode ? 'Administrator Email' : 'Academic Email Address'}
+                {isAdminMode ? 'Administrator Email' : 'Academic Email or Mobile Number'}
               </label>
               <div className="relative">
                 <input
-                  type="email"
-                  autoComplete="email"
-                  placeholder={isAdminMode ? 'admin@college.edu' : 'faculty@college.edu'}
+                  type="text"
+                  autoComplete="username"
+                  placeholder={isAdminMode ? 'admin@college.edu' : 'faculty@college.edu or 9876543210'}
                   {...register('email')}
                   className="w-full px-4 py-3 min-h-[48px] bg-[#fdfbef] border border-[#ecdcae] rounded-xl text-sm font-medium text-stone-900 focus:outline-none focus:ring-2 focus:ring-maroon-700 focus:border-transparent transition-all"
                 />
