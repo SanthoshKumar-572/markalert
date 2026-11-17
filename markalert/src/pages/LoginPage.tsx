@@ -39,8 +39,8 @@ export const LoginPage: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'faculty@college.edu',
-      password: 'Faculty@123',
+      email: '',
+      password: '',
     },
   });
 
@@ -106,8 +106,8 @@ export const LoginPage: React.FC = () => {
                 onClick={() => {
                   setIsAdminMode(false);
                   setServerError(null);
-                  setValue('email', 'faculty@college.edu');
-                  setValue('password', 'Faculty@123');
+                  setValue('email', '');
+                  setValue('password', '');
                 }}
                 className="text-[11px] font-semibold text-stone-500 hover:text-maroon-700 underline cursor-pointer"
               >
@@ -200,13 +200,8 @@ export const LoginPage: React.FC = () => {
                 const next = !isAdminMode;
                 setIsAdminMode(next);
                 setServerError(null);
-                if (next) {
-                  setValue('email', 'admin@college.edu');
-                  setValue('password', 'Admin@123');
-                } else {
-                  setValue('email', 'faculty@college.edu');
-                  setValue('password', 'Faculty@123');
-                }
+                setValue('email', '');
+                setValue('password', '');
               }}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-maroon-700 underline underline-offset-4 transition-colors cursor-pointer"
             >
