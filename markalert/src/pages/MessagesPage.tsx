@@ -153,18 +153,21 @@ export const MessagesPage: React.FC = () => {
 
   const handleSendBatch = async () => {
     if (!batchId) return;
-    if (selectedRecipientIds.size === 0) {
-      setErrorMessage('Please select at least one student to send notifications.');
-      return;
-    }
     setIsSending(true);
     setErrorMessage(null);
+
+    // If specific students are selected, send to those.
+    // If not select any one, send ENTIRELY (all recipients in the batch)!
+    const recipientIdsToSend =
+      selectedRecipientIds.size > 0
+        ? Array.from(selectedRecipientIds)
+        : previews.map(p => p.recipientId);
 
     try {
       await api.batches.sendBatch(batchId, {
         channel,
         custom_template: customTemplate || undefined,
-        recipient_ids: Array.from(selectedRecipientIds),
+        recipient_ids: recipientIdsToSend,
       });
       navigate(`/batches/${batchId}/progress`);
     } catch (err: any) {
@@ -363,8 +366,15 @@ export const MessagesPage: React.FC = () => {
                   Choose Students to Send Message
                 </h3>
                 <p className="text-xs text-stone-500">
-                  Select which students' parents will receive the notification (
-                  <span className="font-bold text-[#7A1A2C]">{selectedRecipientIds.size}</span> of {previews.length} selected)
+                  {selectedRecipientIds.size === 0 ? (
+                    <span className="text-emerald-700 font-medium">
+                      All {previews.length} parents will receive message (no individual filter applied)
+                    </span>
+                  ) : (
+                    <span>
+                      Sending to <span className="font-bold text-[#7A1A2C]">{selectedRecipientIds.size}</span> of {previews.length} selected parents
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -669,15 +679,13 @@ export const MessagesPage: React.FC = () => {
         <Button
           size="lg"
           onClick={() => setShowConfirmModal(true)}
-          disabled={previews.length === 0 || selectedRecipientIds.size === 0}
+          disabled={previews.length === 0}
           className="gap-2 shadow-md cursor-pointer"
         >
           <Send className="w-4 h-4" />
           <span>
-            {selectedRecipientIds.size === 0
-              ? 'Select Students to Send'
-              : selectedRecipientIds.size === previews.length
-              ? `Confirm & Send to All (${previews.length}) Parents`
+            {selectedRecipientIds.size === 0 || selectedRecipientIds.size === previews.length
+              ? `Confirm & Send to Entire Batch (${previews.length} Parents)`
               : `Confirm & Send to ${selectedRecipientIds.size} Selected Parents`}
           </span>
         </Button>
@@ -703,9 +711,11 @@ export const MessagesPage: React.FC = () => {
 
             <div className="p-4 bg-stone-50 rounded-xl space-y-2 text-xs text-stone-700 border border-stone-200">
               <div className="flex justify-between py-1 border-b border-stone-200">
-                <span className="font-medium text-stone-500">Selected Recipients:</span>
+                <span className="font-medium text-stone-500">Target Recipients:</span>
                 <span className="font-bold text-[#7A1A2C]">
-                  {selectedRecipientIds.size} of {previews.length} parents selected
+                  {selectedRecipientIds.size === 0 || selectedRecipientIds.size === previews.length
+                    ? `Entire Batch (All ${previews.length} Parents)`
+                    : `${selectedRecipientIds.size} of ${previews.length} Selected Parents`}
                 </span>
               </div>
               <div className="flex justify-between py-1 border-b border-stone-200">
