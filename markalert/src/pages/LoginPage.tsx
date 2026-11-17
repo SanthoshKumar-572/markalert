@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { Shield, ArrowRight, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { useAuth } from '../lib/auth';
+import { API_BASE_URL } from '../lib/api';
 import appLogo from '../assets/app-logo.png';
 import vsbLogo from '../assets/vsb-logo.png';
 
@@ -23,6 +24,15 @@ export const LoginPage: React.FC = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
+
+  // Pre-warm the backend server & database connection as soon as login screen opens
+  useEffect(() => {
+    try {
+      fetch(`${API_BASE_URL}/health`).catch(() => {});
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // Detect whether running inside the Capacitor mobile app
   const isMobileApp =

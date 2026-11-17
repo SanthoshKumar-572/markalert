@@ -14,6 +14,18 @@ export class AuthService {
   public async login(email: string, passwordPlain: string, ipAddress?: string) {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },
+      select: {
+        id: true,
+        email: true,
+        password_hash: true,
+        is_active: true,
+        role: true,
+        full_name: true,
+        department: true,
+        designation: true,
+        mobile_number: true,
+        employee_id: true,
+      },
     });
 
     if (!user) {
@@ -43,7 +55,7 @@ export class AuthService {
 
     // Save refresh token record (7 days expiry)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    await prisma.refreshToken.create({
+    const saveTokenPromise = prisma.refreshToken.create({
       data: {
         user_id: user.id,
         token_hash: tokenHash,
@@ -51,7 +63,10 @@ export class AuthService {
       },
     });
 
-    await logAudit(user.id, 'LOGIN', 'users', user.id, { email: user.email }, ipAddress);
+    // Fire audit log asynchronously in background (saves ~250ms round-trip)
+    void logAudit(user.id, 'LOGIN', 'users', user.id, { email: user.email }, ipAddress);
+
+    await saveTokenPromise;
 
     return {
       user: {
