@@ -158,7 +158,13 @@ export const api = {
     },
     async sendBatch(
       batchId: string,
-      data: { channel: 'WHATSAPP' | 'SMS' | 'BOTH'; custom_template?: string; force_resend?: boolean }
+      data: {
+        channel: 'WHATSAPP' | 'SMS' | 'BOTH';
+        custom_template?: string;
+        force_resend?: boolean;
+        recipient_ids?: string[];
+        register_numbers?: string[];
+      }
     ): Promise<{ batchId: string; queued: number; message: string }> {
       const res = await apiClient.post(`/batches/${batchId}/send`, data);
       return res.data.data;

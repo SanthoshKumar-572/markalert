@@ -21,7 +21,7 @@ export class NotificationsController {
     try {
       const { id } = req.params;
       const userId = req.user!.id;
-      const { channel, custom_template, force_resend } = req.body;
+      const { channel, custom_template, force_resend, recipient_ids, register_numbers } = req.body;
 
       const result = await notificationsService.sendBatch({
         batchId: id,
@@ -29,6 +29,8 @@ export class NotificationsController {
         channel,
         customTemplate: custom_template,
         forceResend: Boolean(force_resend),
+        recipientIds: recipient_ids,
+        registerNumbers: register_numbers,
       });
 
       res.json({ success: true, data: result });

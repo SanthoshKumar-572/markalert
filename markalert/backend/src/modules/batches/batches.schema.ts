@@ -25,4 +25,6 @@ export const sendBatchSchema = z.object({
   template_text: z.string().optional(),
   custom_template: z.string().optional(),
   force_resend: z.boolean().optional(),
+  recipient_ids: z.array(z.string()).optional(),
+  register_numbers: z.array(z.string()).optional(),
 });

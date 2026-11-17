@@ -60,28 +60,38 @@ export class NotificationsService {
     };
   }
 
-  // Dispatches batch notifications asynchronously
+  // Dispatches batch notifications asynchronously (supports selecting specific students)
   public async sendBatch(params: {
     batchId: string;
     userId: string;
     channel: 'WHATSAPP' | 'SMS' | 'BOTH';
     customTemplate?: string;
     forceResend?: boolean;
+    recipientIds?: string[];
+    registerNumbers?: string[];
   }) {
-    const { batchId, userId, channel, customTemplate, forceResend } = params;
+    const { batchId, userId, channel, customTemplate, forceResend, recipientIds, registerNumbers } = params;
 
     const batch = await prisma.notificationBatch.findUnique({ where: { id: batchId } });
     if (!batch) throw new Error(`Batch '${batchId}' not found`);
 
+    const whereClause: any = {
+      batch_id: batchId,
+      status: { in: [RecipientStatus.VALID, RecipientStatus.WARNING] },
+    };
+
+    if (recipientIds && recipientIds.length > 0) {
+      whereClause.id = { in: recipientIds };
+    } else if (registerNumbers && registerNumbers.length > 0) {
+      whereClause.register_number = { in: registerNumbers };
+    }
+
     const recipients = await prisma.batchRecipient.findMany({
-      where: {
-        batch_id: batchId,
-        status: { in: [RecipientStatus.VALID, RecipientStatus.WARNING] },
-      },
+      where: whereClause,
     });
 
     if (recipients.length === 0) {
-      throw new Error('This batch has no valid recipient records to notify.');
+      throw new Error('No eligible recipient records selected to notify.');
     }
 
     const channelsToSend: NotificationChannel[] =

@@ -13,6 +13,7 @@ import {
   Edit3,
   RotateCcw,
   Sparkles,
+  Users,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
@@ -36,6 +37,7 @@ export const MessagesPage: React.FC = () => {
 
   const [channel, setChannel] = useState<'WHATSAPP' | 'SMS' | 'BOTH'>('BOTH');
   const [selectedStudentIndex, setSelectedStudentIndex] = useState(0);
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState<Set<string>>(new Set());
   const [customTemplate, setCustomTemplate] = useState<string>('');
   const [isEditingTemplate, setIsEditingTemplate] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -49,6 +51,9 @@ export const MessagesPage: React.FC = () => {
     enabled: !!batchId,
   });
 
+  const previews = previewData?.previews || [];
+  const activeStudent: MessagePreviewItem | undefined = previews[selectedStudentIndex] || previews[0];
+
   // Initialize custom template editor with default WhatsApp template
   useEffect(() => {
     if (previewData?.templates?.whatsapp && !customTemplate) {
@@ -56,8 +61,42 @@ export const MessagesPage: React.FC = () => {
     }
   }, [previewData?.templates?.whatsapp, customTemplate]);
 
-  const previews = previewData?.previews || [];
-  const activeStudent: MessagePreviewItem | undefined = previews[selectedStudentIndex] || previews[0];
+  // Select all students by default when previewData loads
+  useEffect(() => {
+    if (previewData?.previews && previewData.previews.length > 0) {
+      setSelectedRecipientIds(new Set(previewData.previews.map(p => p.recipientId)));
+    }
+  }, [previewData?.previews]);
+
+  const toggleSelectStudent = (recipientId: string) => {
+    setSelectedRecipientIds(prev => {
+      const next = new Set(prev);
+      if (next.has(recipientId)) {
+        next.delete(recipientId);
+      } else {
+        next.add(recipientId);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedRecipientIds(new Set(previews.map(p => p.recipientId)));
+  };
+
+  const deselectAll = () => {
+    setSelectedRecipientIds(new Set());
+  };
+
+  const selectFailedOnly = () => {
+    const failedIds = previews.filter(p => p.percentage < 50).map(p => p.recipientId);
+    setSelectedRecipientIds(new Set(failedIds));
+  };
+
+  const selectPassedOnly = () => {
+    const passedIds = previews.filter(p => p.percentage >= 50).map(p => p.recipientId);
+    setSelectedRecipientIds(new Set(passedIds));
+  };
 
   const handleInsertVariable = (token: string) => {
     setCustomTemplate(prev => `${prev} ${token}`);
@@ -73,6 +112,10 @@ export const MessagesPage: React.FC = () => {
 
   const handleSendBatch = async () => {
     if (!batchId) return;
+    if (selectedRecipientIds.size === 0) {
+      setErrorMessage('Please select at least one student to send notifications.');
+      return;
+    }
     setIsSending(true);
     setErrorMessage(null);
 
@@ -80,6 +123,7 @@ export const MessagesPage: React.FC = () => {
       await api.batches.sendBatch(batchId, {
         channel,
         custom_template: customTemplate || undefined,
+        recipient_ids: Array.from(selectedRecipientIds),
       });
       navigate(`/batches/${batchId}/progress`);
     } catch (err: any) {
@@ -242,6 +286,145 @@ export const MessagesPage: React.FC = () => {
         </Card>
       )}
 
+      {/* Student Selection Panel */}
+      {!isLoading && previews.length > 0 && (
+        <div className="bg-white border border-stone-200/90 rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-lg bg-[#fdf2f4] text-[#7A1A2C] flex items-center justify-center font-bold shrink-0">
+                <Users className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-stone-900 tracking-tight">
+                  Choose Students to Send Message
+                </h3>
+                <p className="text-xs text-stone-500">
+                  Select which students' parents will receive the notification (
+                  <span className="font-bold text-[#7A1A2C]">{selectedRecipientIds.size}</span> of {previews.length} selected)
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Filters */}
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              <button
+                type="button"
+                onClick={selectAll}
+                className="px-2.5 py-1 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold cursor-pointer transition-colors"
+              >
+                Select All ({previews.length})
+              </button>
+              <button
+                type="button"
+                onClick={deselectAll}
+                className="px-2.5 py-1 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold cursor-pointer transition-colors"
+              >
+                Clear All
+              </button>
+              <button
+                type="button"
+                onClick={selectFailedOnly}
+                className="px-2.5 py-1 rounded-md bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold cursor-pointer transition-colors"
+              >
+                Failed Only (&lt;50%)
+              </button>
+              <button
+                type="button"
+                onClick={selectPassedOnly}
+                className="px-2.5 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold cursor-pointer transition-colors"
+              >
+                Passed Only (≥50%)
+              </button>
+            </div>
+          </div>
+
+          {/* Student Selection Table */}
+          <div className="max-h-64 overflow-y-auto border border-stone-200 rounded-xl">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-stone-50 border-b border-stone-200 text-stone-700 sticky top-0 font-bold uppercase text-[10px]">
+                <tr>
+                  <th className="py-2.5 px-3 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={previews.length > 0 && selectedRecipientIds.size === previews.length}
+                      onChange={e => (e.target.checked ? selectAll() : deselectAll())}
+                      className="rounded border-stone-300 text-[#7A1A2C] focus:ring-[#7A1A2C] cursor-pointer"
+                    />
+                  </th>
+                  <th className="py-2.5 px-3">Register Number</th>
+                  <th className="py-2.5 px-3">Student Name</th>
+                  <th className="py-2.5 px-3">Parent Mobile</th>
+                  <th className="py-2.5 px-3 text-center">Percentage</th>
+                  <th className="py-2.5 px-3 text-center">Result</th>
+                  <th className="py-2.5 px-3 text-right">Message Preview</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100">
+                {previews.map((std, idx) => {
+                  const isSelected = selectedRecipientIds.has(std.recipientId);
+                  const isFailed = std.percentage < 50;
+                  const isCurrentPreview = idx === selectedStudentIndex;
+
+                  return (
+                    <tr
+                      key={std.recipientId}
+                      className={`hover:bg-stone-50/80 transition-colors ${
+                        isCurrentPreview ? 'bg-[#fdf2f4]/50' : ''
+                      }`}
+                    >
+                      <td className="py-2 px-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectStudent(std.recipientId)}
+                          className="rounded border-stone-300 text-[#7A1A2C] focus:ring-[#7A1A2C] cursor-pointer"
+                        />
+                      </td>
+                      <td className="py-2 px-3 font-mono font-semibold text-stone-900">
+                        {std.registerNumber}
+                      </td>
+                      <td className="py-2 px-3 font-medium text-stone-800">
+                        {std.studentName}
+                      </td>
+                      <td className="py-2 px-3 font-mono text-stone-600">
+                        {std.parentMobileMasked}
+                      </td>
+                      <td className="py-2 px-3 text-center font-bold">
+                        {std.percentage}%
+                      </td>
+                      <td className="py-2 px-3 text-center">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            isFailed
+                              ? 'bg-rose-100 text-rose-800'
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
+                          {isFailed ? 'FAIL' : 'PASS'}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStudentIndex(idx)}
+                          className={`px-2.5 py-1 rounded text-[11px] font-bold cursor-pointer transition-colors ${
+                            isCurrentPreview
+                              ? 'bg-[#7A1A2C] text-white'
+                              : 'text-[#7A1A2C] hover:bg-[#fdf2f4]'
+                          }`}
+                        >
+                          {isCurrentPreview ? 'Previewing' : 'Preview Message'}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* Live Preview Display */}
       {isLoading ? (
         <div className="p-16 text-center text-stone-400 text-sm">
@@ -315,11 +498,17 @@ export const MessagesPage: React.FC = () => {
         <Button
           size="lg"
           onClick={() => setShowConfirmModal(true)}
-          disabled={previews.length === 0}
-          className="gap-2 shadow-md"
+          disabled={previews.length === 0 || selectedRecipientIds.size === 0}
+          className="gap-2 shadow-md cursor-pointer"
         >
           <Send className="w-4 h-4" />
-          <span>Confirm & Send to {previews.length} Parents</span>
+          <span>
+            {selectedRecipientIds.size === 0
+              ? 'Select Students to Send'
+              : selectedRecipientIds.size === previews.length
+              ? `Confirm & Send to All (${previews.length}) Parents`
+              : `Confirm & Send to ${selectedRecipientIds.size} Selected Parents`}
+          </span>
         </Button>
       </div>
 
@@ -343,8 +532,10 @@ export const MessagesPage: React.FC = () => {
 
             <div className="p-4 bg-stone-50 rounded-xl space-y-2 text-xs text-stone-700 border border-stone-200">
               <div className="flex justify-between py-1 border-b border-stone-200">
-                <span className="font-medium text-stone-500">Eligible Recipients:</span>
-                <span className="font-bold text-stone-900">{previews.length} parents</span>
+                <span className="font-medium text-stone-500">Selected Recipients:</span>
+                <span className="font-bold text-[#7A1A2C]">
+                  {selectedRecipientIds.size} of {previews.length} parents selected
+                </span>
               </div>
               <div className="flex justify-between py-1 border-b border-stone-200">
                 <span className="font-medium text-stone-500">Channels Selected:</span>
